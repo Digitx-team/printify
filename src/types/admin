@@ -1,0 +1,57 @@
+export type OrderStatus = "Pending" | "Shipped" | "Delivered";
+export type ProductStatus = "Active" | "Draft";
+export type TrendDirection = "up" | "down";
+
+export interface StatCard {
+  title: string;
+  value: string;
+  change: string;
+  trend: TrendDirection;
+  icon: string;
+}
+
+export interface Order {
+  id: string;
+  customer: string;
+  email: string;
+  date: string;
+  status: OrderStatus;
+  total: string;
+  items: number;
+  paymentMethod?: string;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  sku: string;
+  price: string;
+  stock: number;
+  views: number;
+  status: ProductStatus;
+  image: string;
+  category: string;
+}
+
+export interface RevenueDataPoint {
+  month: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface SalesDataPoint {
+  date: string;
+  sales: number;
+  visitors: number;
+}
+
+export interface TopProductData {
+  name: string;
+  sales: number;
+}
+
+export interface TrafficSourceData {
+  name: string;
+  value: number;
+  color: string;
+}

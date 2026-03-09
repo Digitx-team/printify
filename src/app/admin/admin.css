@@ -1,0 +1,84 @@
+/* ─── Admin Dashboard Styles ─── */
+/* Scoped to #admin-root to avoid conflicting with the main site */
+
+#admin-root {
+  --color-primary: #00D4FF;
+  --color-primary-light: #33DFFF;
+  --color-primary-lighter: #E0F9FF;
+  --color-primary-dark: #00B8E0;
+  --color-surface: #FFFFFF;
+  --color-background: #F7F8FA;
+  --color-sidebar: #FAFAFA;
+  --color-border: #E2E4E9;
+  --color-text-primary: #111111;
+  --color-text-secondary: #6B7280;
+  --color-text-muted: #9CA3AF;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Sidebar Active Link ─── */
+#admin-root .nav-link {
+  transition: all 0.2s ease;
+}
+#admin-root .nav-link:hover {
+  background-color: var(--color-primary-lighter);
+  color: var(--color-primary-dark);
+}
+#admin-root .nav-link.active {
+  background-color: var(--color-primary);
+  color: #111111;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+/* ─── Status Badges ─── */
+#admin-root .badge-delivered { background-color: #D1FAE5; color: #065F46; }
+#admin-root .badge-shipped { background-color: #DBEAFE; color: #1E40AF; }
+#admin-root .badge-pending { background-color: #FEF3C7; color: #92400E; }
+#admin-root .badge-active { background-color: #D1FAE5; color: #065F46; }
+#admin-root .badge-draft { background-color: #F3F4F6; color: #6B7280; }
+
+/* ─── Card Hover ─── */
+#admin-root .card-hover { transition: all 0.2s ease; }
+#admin-root .card-hover:hover { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); transform: translateY(-1px); }
+
+/* ─── Table Row Hover ─── */
+#admin-root .table-row-hover { transition: background-color 0.15s ease; }
+#admin-root .table-row-hover:hover { background-color: #F9FAFB; }
+
+/* ─── Button Styles ─── */
+#admin-root .btn-primary { background-color: var(--color-primary); color: #111111; font-weight: 600; transition: all 0.2s ease; }
+#admin-root .btn-primary:hover { background-color: var(--color-primary-dark); box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3); }
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#admin-root .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+#admin-root .animate-delay-1 { animation-delay: 0.05s; }
+#admin-root .animate-delay-2 { animation-delay: 0.1s; }
+#admin-root .animate-delay-3 { animation-delay: 0.15s; }
+#admin-root .animate-delay-4 { animation-delay: 0.2s; }
+
+/* ─── RTL Support ─── */
+#admin-root[dir="rtl"] {
+  font-family: "Cairo", "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+#admin-root[dir="rtl"] .nav-link {
+  flex-direction: row;
+}
+
+/* RTL sidebar border */
+#admin-root[dir="rtl"] aside {
+  border-left: 1px solid var(--color-border);
+  border-right: none;
+}
+
