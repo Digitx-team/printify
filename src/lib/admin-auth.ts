@@ -1,38 +1,21 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 
-const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET || 'fallback-secret');
-const COOKIE_NAME = 'casify-admin-session';
-
-export async function createSession(email: string): Promise<string> {
-  const token = await new SignJWT({ email, role: 'admin' })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(SECRET);
-  return token;
-}
-
-export async function verifySession(token: string) {
-  try {
-    const { payload } = await jwtVerify(token, SECRET);
-    return payload as { email: string; role: string };
-  } catch {
-    return null;
-  }
-}
-
+/**
+ * Get the current authenticated admin user from Supabase session.
+ * Use this in Server Components / Route Handlers.
+ */
 export async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifySession(token);
-}
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
-export function validateCredentials(email: string, password: string): boolean {
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  return email === adminEmail && password === adminPassword;
-}
+  if (error || !user) return null;
 
-export { COOKIE_NAME };
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    role: user.role ?? 'authenticated',
+  };
+}

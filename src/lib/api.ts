@@ -116,28 +116,49 @@ export async function submitOrder(order: OrderSubmission) {
     throw new Error('Failed to create order items');
   }
 
-  // 3. Attach custom design images (Firebase URLs) if any
-  const imageInserts: { order_item_id: string; image_url: string; sort_order: number }[] = [];
-  order.items.forEach((item, idx) => {
-    if (item.designImages?.length && itemsData?.[idx]) {
-      item.designImages.forEach((url, imgIdx) => {
-        imageInserts.push({
-          order_item_id: itemsData[idx].id,
-          image_url: url,
-          sort_order: imgIdx,
-        });
-      });
-    }
-  });
-
-  if (imageInserts.length > 0) {
-    await supabase.from('order_item_images').insert(imageInserts);
-  }
+  // Design images for regular orders should be uploaded to Supabase Storage
 
   return {
     orderId: orderData.id,
     orderNumber: orderData.order_number,
   };
+}
+
+// ─── Submit custom order (from /create personalization page) ───
+export interface CustomOrderSubmission {
+  customerName: string;
+  customerPhone: string;
+  wilaya: string;
+  address: string;
+  brandSlug: string;
+  phoneModel: string;
+  description: string;
+}
+
+export async function submitCustomOrder(order: CustomOrderSubmission) {
+  if (!getSupabase()) throw new Error('Supabase is not configured');
+
+  const { data, error } = await supabase
+    .from('custom_orders')
+    .insert({
+      customer_name: order.customerName,
+      customer_phone: order.customerPhone,
+      wilaya: order.wilaya,
+      address: order.address,
+      brand_slug: order.brandSlug,
+      phone_model: order.phoneModel,
+      description: order.description,
+      status: 'new',
+    })
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Error creating custom order:', error);
+    throw new Error('Failed to create custom order');
+  }
+
+  return { orderId: (data as any)?.id };
 }
 
 // ─── Store settings (read-only from storefront) ───

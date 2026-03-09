@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Lock, Mail, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useAdminI18n } from "@/components/admin/AdminI18nProvider";
 
 export default function LoginForm() {
+  return (
+    <Suspense>
+      <LoginFormInner />
+    </Suspense>
+  );
+}
+
+function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";

@@ -1,16 +1,9 @@
-import { NextResponse } from 'next/server';
-import { COOKIE_NAME } from '@/lib/admin-auth';
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
-  const response = NextResponse.json({ success: true });
+  const supabase = await createClient();
+  await supabase.auth.signOut();
 
-  response.cookies.set(COOKIE_NAME, '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 0,
-    path: '/',
-  });
-
-  return response;
+  return NextResponse.json({ success: true });
 }

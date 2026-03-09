@@ -198,7 +198,7 @@ export default function OrdersTable() {
                       </td>
                       <td className="px-3 py-3.5">
                         <span className="text-sm text-text-secondary">
-                          {new Date(order.created_at).toLocaleDateString("en-US", {
+                          {new Date(order.created_at).toLocaleDateString(undefined, {
                             month: "short", day: "numeric", year: "numeric",
                           })}
                         </span>

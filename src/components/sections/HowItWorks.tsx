@@ -70,7 +70,7 @@ export default function HowItWorks() {
         >
           <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
           <span className="relative z-[1]">{t.cta}</span>
-          <span className="relative z-[1] transition-transform group-hover:translate-x-0.5">→</span>
+          <span className="relative z-[1] transition-transform group-hover:translate-x-0.5 arrow-flip">→</span>
         </Link>
       </div>
     </section>

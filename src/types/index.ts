@@ -7,7 +7,7 @@ export interface PhoneModel {
   id: string;
   name: string;
   brand: Brand;
-  subtitle: string;
+  subtitle?: string;
   popular?: boolean;
 }
 

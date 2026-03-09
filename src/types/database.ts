@@ -14,30 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      brands: {
-        Row: {
-          created_at: string | null
-          id: string
-          label: string
-          slug: string
-          sort_order: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          label: string
-          slug: string
-          sort_order?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          label?: string
-          slug?: string
-          sort_order?: number | null
-        }
-        Relationships: []
-      }
       coupons: {
         Row: {
           code: string
@@ -77,37 +53,53 @@ export type Database = {
         }
         Relationships: []
       }
-      order_item_images: {
+      custom_orders: {
         Row: {
+          address: string | null
+          brand_slug: string
           created_at: string | null
+          customer_name: string
+          customer_phone: string
+          description: string | null
           id: string
-          image_url: string
-          order_item_id: string
-          sort_order: number | null
+          image_urls: string[] | null
+          order_number: string | null
+          phone_model: string
+          status: string
+          updated_at: string | null
+          wilaya: string
         }
         Insert: {
+          address?: string | null
+          brand_slug: string
           created_at?: string | null
+          customer_name: string
+          customer_phone: string
+          description?: string | null
           id?: string
-          image_url: string
-          order_item_id: string
-          sort_order?: number | null
+          image_urls?: string[] | null
+          order_number?: string | null
+          phone_model: string
+          status?: string
+          updated_at?: string | null
+          wilaya: string
         }
         Update: {
+          address?: string | null
+          brand_slug?: string
           created_at?: string | null
+          customer_name?: string
+          customer_phone?: string
+          description?: string | null
           id?: string
-          image_url?: string
-          order_item_id?: string
-          sort_order?: number | null
+          image_urls?: string[] | null
+          order_number?: string | null
+          phone_model?: string
+          status?: string
+          updated_at?: string | null
+          wilaya?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "order_item_images_order_item_id_fkey"
-            columns: ["order_item_id"]
-            isOneToOne: false
-            referencedRelation: "order_items"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       order_items: {
         Row: {
@@ -116,6 +108,7 @@ export type Database = {
           id: string
           is_custom: boolean | null
           order_id: string
+          phone_model: string | null
           phone_model_id: string | null
           product_id: string | null
           quantity: number | null
@@ -127,6 +120,7 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           order_id: string
+          phone_model?: string | null
           phone_model_id?: string | null
           product_id?: string | null
           quantity?: number | null
@@ -138,6 +132,7 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           order_id?: string
+          phone_model?: string | null
           phone_model_id?: string | null
           product_id?: string | null
           quantity?: number | null
@@ -149,13 +144,6 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_phone_model_id_fkey"
-            columns: ["phone_model_id"]
-            isOneToOne: false
-            referencedRelation: "phone_models"
             referencedColumns: ["id"]
           },
           {
@@ -212,44 +200,6 @@ export type Database = {
         }
         Relationships: []
       }
-      phone_models: {
-        Row: {
-          brand_id: string
-          created_at: string | null
-          id: string
-          name: string
-          popular: boolean | null
-          sort_order: number | null
-          subtitle: string | null
-        }
-        Insert: {
-          brand_id: string
-          created_at?: string | null
-          id?: string
-          name: string
-          popular?: boolean | null
-          sort_order?: number | null
-          subtitle?: string | null
-        }
-        Update: {
-          brand_id?: string
-          created_at?: string | null
-          id?: string
-          name?: string
-          popular?: boolean | null
-          sort_order?: number | null
-          subtitle?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "phone_models_brand_id_fkey"
-            columns: ["brand_id"]
-            isOneToOne: false
-            referencedRelation: "brands"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       product_images: {
         Row: {
           created_at: string | null
@@ -291,6 +241,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          image_url: string | null
           name: string
           popular: boolean | null
           price: number
@@ -304,6 +255,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          image_url?: string | null
           name: string
           popular?: boolean | null
           price?: number
@@ -317,6 +269,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          image_url?: string | null
           name?: string
           popular?: boolean | null
           price?: number
@@ -354,6 +307,24 @@ export type Database = {
           updated_at?: string | null
           wilaya_code?: string
           wilaya_name?: string
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string | null
+          value?: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string | null
+          value?: string
         }
         Relationships: []
       }
@@ -486,44 +457,3 @@ export type Enums<
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      coupon_status: ["active", "expired", "disabled"],
-      coupon_type: ["percentage", "fixed"],
-      order_status: [
-        "pending",
-        "confirmed",
-        "shipped",
-        "delivered",
-        "cancelled",
-      ],
-      product_category: [
-        "personalized",
-        "artistic",
-        "calligraphy",
-        "nature",
-        "geometric",
-      ],
-      product_status: ["active", "draft"],
-    },
-  },
-} as const

@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Package,
   Users,
+  Palette,
   TrendingUp,
   TrendingDown,
   Loader2,
@@ -19,6 +20,7 @@ const iconMap: Record<string, React.ElementType> = {
   "shopping-bag": ShoppingBag,
   package: Package,
   users: Users,
+  palette: Palette,
 };
 
 export default function StatsCards() {
@@ -35,8 +37,8 @@ export default function StatsCards() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 lg:gap-5">
+        {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="bg-white rounded-2xl p-5 border border-border h-[120px] flex items-center justify-center">
             <Loader2 size={20} className="animate-spin text-text-muted" />
           </div>
@@ -74,10 +76,17 @@ export default function StatsCards() {
       trend: stats?.pendingOrders > 0 ? ("down" as const) : ("up" as const),
       icon: "users",
     },
+    {
+      title: "Custom Orders",
+      value: (stats?.totalCustomOrders || 0).toLocaleString(),
+      change: `${stats?.newCustomOrders || 0} new`,
+      trend: (stats?.newCustomOrders || 0) > 0 ? ("up" as const) : ("up" as const),
+      icon: "palette",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 lg:gap-5">
       {cards.map((stat, index) => {
         const IconComponent = iconMap[stat.icon] || Package;
         const isUp = stat.trend === "up";

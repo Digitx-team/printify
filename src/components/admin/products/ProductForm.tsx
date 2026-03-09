@@ -1,21 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, Plus, X as XIcon, Save } from "lucide-react";
+import { ArrowLeft, Upload, Plus, X as XIcon, Save, Loader2 } from "lucide-react";
 import { useAdminI18n } from "@/components/admin/AdminI18nProvider";
+import { createProduct } from "@/lib/admin-api";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 
 export default function ProductForm() {
   const [form, setForm] = useState({
     name: "", description: "", price: "", comparePrice: "", sku: "",
-    status: "Active", tags: ["New Arrival"] as string[],
+    status: "active", tags: ["New Arrival"] as string[],
     metaTitle: "", metaDescription: "", urlSlug: "",
     trackInventory: true, stock: "",
   });
   const [tagInput, setTagInput] = useState("");
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const { t } = useAdminI18n();
+  const router = useRouter();
 
   const updateField = (key: string, value: string | boolean) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -32,9 +37,37 @@ export default function ProductForm() {
     setForm(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
   };
 
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const handleSave = async () => {
+    if (!form.name.trim()) {
+      setError(t("productForm.productName") + " is required");
+      return;
+    }
+    if (!form.price || parseFloat(form.price) <= 0) {
+      setError(t("productForm.priceDa") + " is required");
+      return;
+    }
+
+    setError("");
+    setSaving(true);
+    try {
+      await createProduct({
+        name: form.name.trim(),
+        price: parseFloat(form.price),
+        description: form.description.trim(),
+        status: form.status,
+        stock: form.stock ? parseInt(form.stock) : 0,
+        sku: form.sku.trim(),
+      });
+      setSaved(true);
+      setTimeout(() => {
+        router.push("/admin/products");
+      }, 1000);
+    } catch (err: any) {
+      console.error("Save product error:", err);
+      setError(err?.message || "Failed to save product");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -50,8 +83,14 @@ export default function ProductForm() {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="text-sm font-medium text-emerald-600">{t("productForm.saved")}</span>}
-          <button onClick={handleSave} className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
-            <Save size={16} /> {t("productForm.saveProduct")}
+          {error && <span className="text-sm font-medium text-red-500">{error}</span>}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            {saving ? t("products.saving") : t("productForm.saveProduct")}
           </button>
         </div>
       </div>
@@ -87,11 +126,11 @@ export default function ProductForm() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1.5">{t("productForm.priceDa")}</label>
-                <input type="text" value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="0.00" className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                <input type="number" value={form.price} onChange={(e) => updateField("price", e.target.value)} placeholder="0" className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1.5">{t("productForm.comparePrice")}</label>
-                <input type="text" value={form.comparePrice} onChange={(e) => updateField("comparePrice", e.target.value)} placeholder="0.00" className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                <input type="number" value={form.comparePrice} onChange={(e) => updateField("comparePrice", e.target.value)} placeholder="0" className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1.5">{t("products.sku")}</label>
@@ -127,9 +166,8 @@ export default function ProductForm() {
           <div className="bg-white rounded-2xl border border-border p-5 lg:p-6">
             <h3 className="text-base font-semibold text-text-primary mb-4">{t("productForm.statusLabel")}</h3>
             <select value={form.status} onChange={(e) => updateField("status", e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer bg-white">
-              <option>{t("common.active")}</option>
-              <option>{t("common.draft")}</option>
-              <option>{t("productForm.archived")}</option>
+              <option value="active">{t("common.active")}</option>
+              <option value="draft">{t("common.draft")}</option>
             </select>
           </div>
 

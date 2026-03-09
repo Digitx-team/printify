@@ -143,7 +143,7 @@ export default function Hero() {
           <Link href="/create" className="group relative inline-flex items-center gap-3 px-7 py-3.5 font-sans text-[11px] tracking-[0.1em] uppercase font-medium overflow-hidden rounded-sm" style={{ background: '#111111', color: '#F7F8FA' }}>
             <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
             <span className="relative z-[1]">{t.cta}</span>
-            <span className="relative z-[1] transition-transform group-hover:translate-x-0.5">→</span>
+            <span className="relative z-[1] transition-transform group-hover:translate-x-0.5 arrow-flip">→</span>
           </Link>
           <a href="#products" className="flex items-center gap-2 font-sans text-[11px] tracking-[0.08em] uppercase text-muted hover:text-ink transition-colors">
             <span className="w-8 h-8 rounded-full border border-soft flex items-center justify-center text-[10px] hover:border-ink transition-colors">▶</span>

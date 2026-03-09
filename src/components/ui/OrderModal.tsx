@@ -1,158 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, Smartphone, ChevronDown, Search, Check, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Loader2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { fetchShippingRates, submitOrder } from '@/lib/api';
-import { BRANDS, PHONE_MODELS } from '@/lib/constants';
 import Image from 'next/image';
-import type { Brand, PhoneModel } from '@/types';
-
-/* ─── Searchable phone dropdown ────────────────────────────────── */
-function PhoneDropdown({
-  value,
-  onChange,
-  locale,
-  brands,
-  phoneModels,
-}: {
-  value: string;
-  onChange: (modelId: string) => void;
-  locale: string;
-  brands: Brand[];
-  phoneModels: PhoneModel[];
-}) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const ref = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const placeholder =
-    locale === 'ar' ? 'ابحثي عن موديل الهاتف...' :
-    locale === 'en' ? 'Search phone model...' :
-    'Rechercher un modèle...';
-
-  const selectedModel = phoneModels.find(m => m.id === value);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 50);
-  }, [open]);
-
-  const query = search.toLowerCase().trim();
-  const filteredByBrand = brands.map(brand => {
-    const models = phoneModels.filter(m =>
-      m.brand.id === brand.id &&
-      (query === '' || m.name.toLowerCase().includes(query) || brand.label.toLowerCase().includes(query))
-    );
-    return { brand, models };
-  }).filter(g => g.models.length > 0);
-
-  const handleSelect = useCallback((modelId: string) => {
-    onChange(modelId);
-    setOpen(false);
-    setSearch('');
-  }, [onChange]);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className={`w-full h-[42px] flex items-center gap-2 px-3 rounded-lg border text-left font-sans text-[13px] transition-all ${
-          open ? 'border-accent bg-white ring-2 ring-accent/10' :
-          value ? 'border-green/40 bg-green/5' : 'border-sand bg-cream'
-        }`}
-      >
-        <Smartphone className={`w-3.5 h-3.5 shrink-0 ${value ? 'text-green' : 'text-muted'}`} />
-        {selectedModel ? (
-          <span className="flex-1 text-ink truncate">{selectedModel.brand.label}, {selectedModel.name}</span>
-        ) : (
-          <span className="flex-1 text-muted">{placeholder}</span>
-        )}
-        <ChevronDown className={`w-4 h-4 text-muted shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-            className="absolute top-[46px] left-0 right-0 z-50 bg-white border border-sand rounded-xl shadow-[0_12px_40px_rgba(44,31,20,0.12)] overflow-hidden"
-          >
-            <div className="flex items-center gap-2 px-3 py-2.5 border-b border-sand/60">
-              <Search className="w-3.5 h-3.5 text-muted shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder={placeholder}
-                className="flex-1 font-sans text-[13px] text-ink placeholder:text-muted/50 outline-none bg-transparent"
-              />
-              {search && (
-                <button onClick={() => setSearch('')} className="text-muted hover:text-ink">
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-
-            <div className="max-h-[220px] overflow-y-auto">
-              {filteredByBrand.length === 0 ? (
-                <div className="py-6 text-center">
-                  <p className="font-sans text-[12px] text-muted">
-                    {locale === 'ar' ? 'لا نتائج' : locale === 'en' ? 'No results found' : 'Aucun résultat'}
-                  </p>
-                </div>
-              ) : (
-                filteredByBrand.map(({ brand, models }) => (
-                  <div key={brand.id}>
-                    <div className="px-3 py-1.5 bg-cream/60 sticky top-0">
-                      <span className="font-sans text-[9px] tracking-[0.12em] uppercase text-muted font-medium">{brand.label}</span>
-                    </div>
-                    {models.map(m => {
-                      const isSelected = value === m.id;
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => handleSelect(m.id)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
-                            isSelected ? 'bg-green/5' : 'hover:bg-cream/50'
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <p className={`font-sans text-[12px] truncate ${isSelected ? 'text-ink font-medium' : 'text-ink'}`}>{m.name}</p>
-                          </div>
-                          {m.popular && (
-                            <span className="text-[8px] font-sans tracking-wider uppercase text-accent bg-accent/10 px-1.5 py-0.5 rounded-full shrink-0">
-                              {locale === 'ar' ? 'شائع' : locale === 'en' ? 'Popular' : 'Populaire'}
-                            </span>
-                          )}
-                          {isSelected && <Check className="w-3.5 h-3.5 text-green shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 /* ─── Order Modal ──────────────────────────────────────────────── */
 export default function OrderModal({ onClose }: { onClose: () => void }) {
@@ -161,9 +15,6 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState('');
-  const [phoneSelections, setPhoneSelections] = useState<Record<string, string>>({});
-  const brands = BRANDS.filter(b => b.id !== 'all');
-  const phoneModels = PHONE_MODELS;
   const [shippingRates, setShippingRates] = useState<any[]>([]);
 
   // Form state
@@ -199,9 +50,8 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
     orderRef: locale === 'ar' ? 'رقم الطلب' : locale === 'en' ? 'Order ref' : 'Réf. commande',
   };
 
-  const allPhonesSelected = items.every(item => phoneSelections[item.product.id]);
   const formValid = formName.trim() && formPhone.trim() && formWilaya;
-  const canSubmit = allPhonesSelected && formValid && !submitting;
+  const canSubmit = formValid && !submitting;
 
   // Calculate shipping cost
   const selectedRate = shippingRates.find(r => r.wilaya_name === formWilaya);
@@ -219,10 +69,12 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
         address: formAddress.trim(),
         notes: formNotes.trim(),
         items: items.map(item => {
-          const selectedModel = PHONE_MODELS.find(m => m.id === phoneSelections[item.product.id]);
+          // Extract model name from product name format: 'Product — Model' or 'Product — Model — Custom'
+          const parts = item.product.name.split(' — ');
+          const phoneModelName = parts.length > 1 ? parts[1] : '';
           return {
             productId: item.product.id,
-            phoneModelName: selectedModel?.name || '',
+            phoneModelName,
             quantity: item.quantity,
             unitPrice: item.product.price,
           };
@@ -285,27 +137,15 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
               {/* Items with phone model dropdown */}
               <div className="space-y-4 mb-6 pb-6 border-b border-sand">
                 {items.map((item) => (
-                  <div key={item.product.id} className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-14 rounded-lg overflow-hidden bg-sand relative shrink-0">
-                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="48px" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-sans text-[13px] font-medium text-ink truncate">{item.product.name}</p>
-                        <p className="font-serif text-sm text-accent">{item.product.price.toLocaleString()} DA <span className="font-sans text-[11px] text-muted font-normal">×{item.quantity}</span></p>
-                      </div>
-                      <span className="font-serif text-sm text-ink shrink-0">{(item.product.price * item.quantity).toLocaleString()} DA</span>
+                  <div key={item.product.id} className="flex items-center gap-3">
+                    <div className="w-12 h-14 rounded-lg overflow-hidden bg-sand relative shrink-0">
+                      <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="48px" />
                     </div>
-                    <div className="pl-[60px]">
-                      <label className="block font-sans text-[9px] tracking-[0.1em] uppercase text-muted mb-1">{t.phoneModel}</label>
-                      <PhoneDropdown
-                        value={phoneSelections[item.product.id] || ''}
-                        onChange={(modelId) => setPhoneSelections(prev => ({ ...prev, [item.product.id]: modelId }))}
-                        locale={locale}
-                        brands={brands}
-                        phoneModels={phoneModels}
-                      />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans text-[13px] font-medium text-ink truncate">{item.product.name}</p>
+                      <p className="font-serif text-sm text-accent">{item.product.price.toLocaleString()} DA <span className="font-sans text-[11px] text-muted font-normal">×{item.quantity}</span></p>
                     </div>
+                    <span className="font-serif text-sm text-ink shrink-0">{(item.product.price * item.quantity).toLocaleString()} DA</span>
                   </div>
                 ))}
 
@@ -371,14 +211,12 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
                 ) : (
                   <>
                     <span className="relative z-[1]">{t.confirm}</span>
-                    <span className="relative z-[1]">→</span>
+                    <span className="relative z-[1] arrow-flip">→</span>
                   </>
                 )}
               </button>
 
-              {!allPhonesSelected && items.length > 0 && (
-                <p className="font-sans text-[10px] text-accent text-center mt-2">{t.selectAll}</p>
-              )}
+
             </>
           )}
         </div>

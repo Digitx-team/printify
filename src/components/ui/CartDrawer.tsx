@@ -94,7 +94,7 @@ export default function CartDrawer() {
                   >
                     <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-400" />
                     <span className="relative z-[1]">{t.checkout}</span>
-                    <span className="relative z-[1]">→</span>
+                    <span className="relative z-[1] arrow-flip">→</span>
                   </button>
                 </div>
               )}

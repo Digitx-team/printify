@@ -13,6 +13,8 @@ export default function Customize() {
   const [submitted, setSubmitted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeBrand, setActiveBrand] = useState('');
+  const [isOtherPhone, setIsOtherPhone] = useState(false);
+  const [otherPhoneText, setOtherPhoneText] = useState('');
   const filteredModels = PHONE_MODELS.filter(m => m.brand.id === activeBrand);
 
   const t = {
@@ -42,6 +44,8 @@ export default function Customize() {
     submit: locale === 'ar' ? 'أرسلي طلبي' : locale === 'en' ? 'Send my order' : 'Envoyer ma commande',
     success: locale === 'ar' ? '✓ تم إرسال الطلب!' : locale === 'en' ? '✓ Order sent!' : '✓ Commande envoyée !',
     preview: locale === 'ar' ? 'معاينة' : locale === 'en' ? 'Preview' : 'Aperçu',
+    otherPhone: locale === 'ar' ? 'هاتف آخر' : locale === 'en' ? 'Other phone' : 'Autre téléphone',
+    otherPhonePlaceholder: locale === 'ar' ? 'اكتب ماركة و موديل هاتفك...' : locale === 'en' ? 'Type your brand & phone model...' : 'Tapez la marque et le modèle...',
   };
 
   useEffect(() => {
@@ -154,30 +158,58 @@ export default function Customize() {
               <input ref={fileInputRef} type="file" id="fileInput" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
 
               {/* Brand & Model */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5">{t.brand}</label>
-                  <select
-                    className="w-full h-[42px] bg-cream border border-sand rounded px-3 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors appearance-none"
-                    onChange={(e) => setActiveBrand(e.target.value)}
-                    value={activeBrand}
-                  >
-                    <option value="">-- {t.brand} --</option>
-                    {BRANDS.filter(b => b.id !== 'all').map(b => (
-                      <option key={b.id} value={b.id}>{b.label}</option>
-                    ))}
-                  </select>
+              {!isOtherPhone && (
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5">{t.brand}</label>
+                    <select
+                      className="w-full h-[42px] bg-cream border border-sand rounded px-3 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors appearance-none"
+                      onChange={(e) => setActiveBrand(e.target.value)}
+                      value={activeBrand}
+                    >
+                      <option value="">-- {t.brand} --</option>
+                      {BRANDS.filter(b => b.id !== 'all').map(b => (
+                        <option key={b.id} value={b.id}>{b.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5">{t.model}</label>
+                    <select className="w-full h-[42px] bg-cream border border-sand rounded px-3 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors appearance-none">
+                      <option value="">-- {t.model} --</option>
+                      {filteredModels.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5">{t.model}</label>
-                  <select className="w-full h-[42px] bg-cream border border-sand rounded px-3 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors appearance-none">
-                    <option value="">-- {t.model} --</option>
-                    {filteredModels.map(m => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </select>
-                </div>
+              )}
+
+              {/* Other phone checkbox */}
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="checkbox"
+                  id="otherPhoneHome"
+                  checked={isOtherPhone}
+                  onChange={() => { setIsOtherPhone(!isOtherPhone); setActiveBrand(''); setOtherPhoneText(''); }}
+                  className="w-4 h-4 rounded border-sand accent-accent cursor-pointer"
+                />
+                <label htmlFor="otherPhoneHome" className="font-sans text-[11px] text-muted cursor-pointer">{t.otherPhone}</label>
               </div>
+
+              {/* Other phone text input */}
+              {isOtherPhone && (
+                <div>
+                  <label className="block font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5">{t.otherPhone}</label>
+                  <input
+                    type="text"
+                    value={otherPhoneText}
+                    onChange={(e) => setOtherPhoneText(e.target.value)}
+                    placeholder={t.otherPhonePlaceholder}
+                    className="w-full h-[42px] bg-cream border border-sand rounded px-3 font-sans text-[13px] text-ink placeholder:text-muted/50 outline-none focus:border-accent transition-colors"
+                  />
+                </div>
+              )}
 
               {/* Name, Phone */}
               <div className="grid grid-cols-2 gap-2.5">
@@ -219,7 +251,7 @@ export default function Customize() {
               >
                 <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-400" />
                 <span className="relative z-[1]">{submitted ? t.success : t.submit}</span>
-                {!submitted && <span className="relative z-[1]">→</span>}
+                {!submitted && <span className="relative z-[1] arrow-flip">→</span>}
               </button>
             </div>
           </div>

@@ -10,17 +10,6 @@ import { fetchProducts } from '@/lib/api';
 import { BRANDS, PHONE_MODELS } from '@/lib/constants';
 import type { Product } from '@/types';
 
-const FILTERS = [
-  { id: 'all', fr: 'Tous', en: 'All', ar: 'الكل' },
-  { id: 'calligraphy', fr: 'Calligraphie', en: 'Calligraphy', ar: 'خط عربي' },
-  { id: 'nature', fr: 'Nature', en: 'Nature', ar: 'طبيعة' },
-  { id: 'artistic', fr: 'Artistique', en: 'Artistic', ar: 'فني' },
-  { id: 'personalized', fr: 'Personnalisé', en: 'Personalized', ar: 'مخصص' },
-  { id: 'geometric', fr: 'Géométrique', en: 'Geometric', ar: 'هندسي' },
-];
-
-// Categories that allow custom name input
-const PERSONALIZABLE = ['calligraphy', 'personalized'];
 
 function ProductOverlay({
   product,
@@ -40,7 +29,7 @@ function ProductOverlay({
   const [modelOpen, setModelOpen] = useState(false);
 
   const filteredModels = PHONE_MODELS.filter(m => m.brand.id === selectedBrand);
-  const isPersonalizable = PERSONALIZABLE.includes(product.category);
+  const isPersonalizable = false; // Custom name input available for all
   const canConfirm = selectedModel !== '';
 
   const t = {
@@ -205,7 +194,6 @@ function ProductOverlay({
 export default function Products() {
   const { locale } = useLanguage();
   const { addItem } = useCart();
-  const [activeFilter, setActiveFilter] = useState('all');
   const [liked, setLiked] = useState<Set<string>>(new Set());
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,7 +206,6 @@ export default function Products() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = activeFilter === 'all' ? products : products.filter(p => p.category === activeFilter);
 
   const toggleLike = (id: string) => {
     setLiked(prev => {
@@ -240,13 +227,11 @@ export default function Products() {
     setSelectedProduct(null);
   };
 
-  const filterLabel = (f: typeof FILTERS[0]) =>
-    locale === 'ar' ? f.ar : locale === 'en' ? f.en : f.fr;
-
   const title = locale === 'ar' ? 'أغطية جاهزة' : locale === 'en' ? 'Ready to order' : 'Prêtes à commander';
   const titleAccent = locale === 'ar' ? 'للطلب' : locale === 'en' ? 'cases' : 'coques';
   const eyebrow = locale === 'ar' ? 'أعمالنا' : locale === 'en' ? 'Our Creations' : 'Nos Créations';
   const orderBtn = locale === 'ar' ? 'طلب' : locale === 'en' ? 'Order' : 'Commander';
+  const viewAllBtn = locale === 'ar' ? 'عرض الكل' : locale === 'en' ? 'View All' : 'Voir tout';
 
   return (
     <>
@@ -259,23 +244,9 @@ export default function Products() {
               {title} <em className="italic text-accent">{titleAccent}</em>
             </h2>
           </div>
-        </div>
-
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2 -mx-5 px-5 md:mx-0 md:px-0">
-          {FILTERS.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setActiveFilter(f.id)}
-              className={`shrink-0 font-sans text-[11px] tracking-[0.08em] uppercase px-4 py-2 rounded-full border transition-all duration-200 ${
-                activeFilter === f.id
-                  ? 'bg-ink text-cream border-ink'
-                  : 'bg-transparent text-muted border-soft/60 hover:border-accent hover:text-accent'
-              }`}
-            >
-              {filterLabel(f)}
-            </button>
-          ))}
+          <a href="/store" className="shrink-0 font-sans text-[11px] tracking-[0.08em] uppercase px-5 py-2.5 rounded-full border border-accent text-accent hover:bg-accent hover:text-cream transition-all duration-200">
+            {viewAllBtn} <span className="arrow-flip">→</span>
+          </a>
         </div>
 
         {/* Loading state */}
@@ -286,7 +257,7 @@ export default function Products() {
         ) : (
           /* Product grid */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-            {filtered.map((product, i) => (
+            {products.slice(0, 8).map((product, i) => (
               <motion.div
                 key={product.id}
                 layout

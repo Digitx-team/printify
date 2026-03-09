@@ -204,12 +204,12 @@ export default function Navbar() {
                     {item.isLink ? (
                       <Link href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center justify-between py-3.5 font-sans text-[13px] text-muted hover:text-ink transition-colors border-b border-soft/10">
                         {label(item)}
-                        <span className="text-[10px] text-soft">→</span>
+                        <span className="text-[10px] text-soft arrow-flip">→</span>
                       </Link>
                     ) : (
                       <a href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center justify-between py-3.5 font-sans text-[13px] text-muted hover:text-ink transition-colors border-b border-soft/10">
                         {label(item)}
-                        <span className="text-[10px] text-soft">→</span>
+                        <span className="text-[10px] text-soft arrow-flip">→</span>
                       </a>
                     )}
                   </motion.li>
@@ -243,7 +243,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center justify-center w-full bg-ink text-cream py-3.5 rounded-full font-sans text-[11px] tracking-[0.12em] uppercase font-medium hover:bg-accent transition-colors"
                 >
-                  {ctaLabel} →
+                  {ctaLabel} <span className="arrow-flip">→</span>
                 </Link>
               </div>
             </motion.div>

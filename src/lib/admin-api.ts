@@ -1,4 +1,11 @@
-import { supabase } from './supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Use an UNTYPED client for admin operations to prevent 
+// postgrest-js from auto-expanding relationships via Database types
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // ─── PRODUCTS ────────────────────────────────
 
@@ -15,19 +22,27 @@ export async function fetchAllProducts() {
 export async function createProduct(product: {
   name: string;
   price: number;
-  category: string;
-  description: string;
-  popular: boolean;
-  status: string;
-  stock: number;
-  sku: string;
+  category?: string;
+  description?: string;
+  popular?: boolean;
+  status?: string;
+  stock?: number;
+  sku?: string;
 }) {
   const { data, error } = await supabase
     .from('products')
-    .insert(product as any)
+    .insert({
+      ...product,
+      category: product.category || 'personalized',
+      status: product.status || 'active',
+      popular: product.popular || false,
+    } as any)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error('createProduct error:', error);
+    throw error;
+  }
   return data;
 }
 
@@ -53,21 +68,35 @@ export async function deleteProduct(id: string) {
 // ─── ORDERS ──────────────────────────────────
 
 export async function fetchAllOrders() {
-  const { data, error } = await supabase
+  // Fetch orders (no nested joins to avoid stale PostgREST schema cache issues)
+  const { data: orders, error: ordersError } = await supabase
     .from('orders')
-    .select(`
-      id, order_number, customer_name, customer_phone, wilaya, address, notes,
-      status, total_amount, shipping_cost, created_at, updated_at,
-      order_items (
-        id, quantity, unit_price, is_custom, custom_description, phone_model,
-        products ( id, name, price ),
-        order_item_images ( id, image_url, sort_order )
-      )
-    `)
+    .select('id, order_number, customer_name, customer_phone, wilaya, address, notes, status, total_amount, shipping_cost, created_at, updated_at')
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data || [];
+  if (ordersError) {
+    console.error('fetchAllOrders error:', ordersError);
+    throw ordersError;
+  }
+
+  if (!orders || orders.length === 0) return [];
+
+  // Fetch order_items separately
+  const orderIds = orders.map(o => o.id);
+  const { data: items, error: itemsError } = await supabase
+    .from('order_items')
+    .select('id, order_id, quantity, unit_price, is_custom, custom_description, phone_model, product_id')
+    .in('order_id', orderIds);
+
+  if (itemsError) {
+    console.error('fetchOrderItems error:', itemsError);
+  }
+
+  // Merge items into orders
+  return orders.map(order => ({
+    ...order,
+    order_items: (items || []).filter(item => item.order_id === order.id),
+  }));
 }
 
 export async function updateOrderStatus(orderId: string, status: string) {
@@ -157,19 +186,50 @@ export async function deleteCoupon(id: string) {
   if (error) throw error;
 }
 
-// Brands & phone models are hardcoded in the frontend constants
-// No need to fetch them from the database
+// Brands & phone models are now fetched from Supabase via api.ts
+
+// ─── CUSTOM ORDERS (from /create personalization page) ───
+
+export async function fetchCustomOrders() {
+  const { data, error } = await supabase
+    .from('custom_orders')
+    .select(`
+      id, order_number, customer_name, customer_phone, wilaya, address,
+      brand_slug, phone_model, description, status, image_urls,
+      created_at, updated_at
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('fetchCustomOrders error:', error);
+    throw error;
+  }
+  return data || [];
+}
+
+export async function updateCustomOrderStatus(id: string, status: string) {
+  const { data, error } = await supabase
+    .from('custom_orders')
+    .update({ status, updated_at: new Date().toISOString() } as any)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
 
 // ─── DASHBOARD STATS ─────────────────────────
 
 export async function fetchDashboardStats() {
-  const [ordersRes, productsRes] = await Promise.all([
+  const [ordersRes, productsRes, customOrdersRes] = await Promise.all([
     supabase.from('orders').select('id, total_amount, status, created_at'),
     supabase.from('products').select('id, stock, status'),
+    supabase.from('custom_orders').select('id, status, created_at'),
   ]);
 
   const orders = ordersRes.data || [];
   const products = productsRes.data || [];
+  const customOrders = (customOrdersRes.data as any[]) || [];
 
   const totalRevenue = orders
     .filter(o => o.status === 'delivered')
@@ -179,6 +239,8 @@ export async function fetchDashboardStats() {
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === 'active').length;
+  const totalCustomOrders = customOrders.length;
+  const newCustomOrders = customOrders.filter((o: any) => o.status === 'new').length;
 
   return {
     totalRevenue,
@@ -186,6 +248,8 @@ export async function fetchDashboardStats() {
     pendingOrders,
     totalProducts,
     activeProducts,
+    totalCustomOrders,
+    newCustomOrders,
   };
 }
 

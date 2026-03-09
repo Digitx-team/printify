@@ -2,28 +2,99 @@ import type { PhoneModel, Product, TestimonialItem, Brand } from '@/types';
 
 export const BRANDS: Brand[] = [
   { id: 'all', label: 'Tous' },
-  { id: 'iphone', label: 'iPhone' },
   { id: 'samsung', label: 'Samsung' },
-  { id: 'huawei', label: 'Huawei' },
-  { id: 'xiaomi', label: 'Xiaomi' },
+  { id: 'iphone', label: 'iPhone' },
+  { id: 'xiaomi', label: 'Xiaomi / Redmi' },
   { id: 'oppo', label: 'Oppo' },
+  { id: 'huawei', label: 'Huawei' },
+  { id: 'realme', label: 'Realme' },
+  { id: 'infinix', label: 'Infinix' },
+  { id: 'tecno', label: 'Tecno' },
+  { id: 'honor', label: 'Honor' },
 ];
 
 export const PHONE_MODELS: PhoneModel[] = [
-  { id: '1', name: 'iPhone 15 Pro', brand: BRANDS[1], subtitle: '4 tailles dispo', popular: true },
-  { id: '2', name: 'iPhone 14', brand: BRANDS[1], subtitle: '3 tailles dispo' },
-  { id: '3', name: 'iPhone 13', brand: BRANDS[1], subtitle: '3 tailles dispo' },
-  { id: '4', name: 'iPhone 15 Pro Max', brand: BRANDS[1], subtitle: '2 tailles dispo', popular: true },
-  { id: '5', name: 'Samsung S24 Ultra', brand: BRANDS[2], subtitle: '2 tailles dispo', popular: true },
-  { id: '6', name: 'Samsung A54', brand: BRANDS[2], subtitle: '2 tailles dispo' },
-  { id: '7', name: 'Samsung S23 FE', brand: BRANDS[2], subtitle: '2 tailles dispo' },
-  { id: '8', name: 'Samsung A34', brand: BRANDS[2], subtitle: '2 tailles dispo' },
-  { id: '9', name: 'Huawei P60 Pro', brand: BRANDS[3], subtitle: '2 tailles dispo' },
-  { id: '10', name: 'Huawei Nova 12', brand: BRANDS[3], subtitle: '2 tailles dispo' },
-  { id: '11', name: 'Xiaomi 14', brand: BRANDS[4], subtitle: '2 tailles dispo' },
-  { id: '12', name: 'Xiaomi Redmi Note 13', brand: BRANDS[4], subtitle: '3 tailles dispo' },
-  { id: '13', name: 'Oppo Reno 11', brand: BRANDS[5], subtitle: '2 tailles dispo' },
-  { id: '14', name: 'Oppo Find X7', brand: BRANDS[5], subtitle: '2 tailles dispo', popular: true },
+  // Samsung — most popular in Algeria
+  { id: 's1', name: 'Samsung Galaxy A15', brand: BRANDS[1], popular: true },
+  { id: 's2', name: 'Samsung Galaxy A25', brand: BRANDS[1], popular: true },
+  { id: 's3', name: 'Samsung Galaxy A35', brand: BRANDS[1], popular: true },
+  { id: 's4', name: 'Samsung Galaxy A55', brand: BRANDS[1], popular: true },
+  { id: 's5', name: 'Samsung Galaxy A05s', brand: BRANDS[1] },
+  { id: 's6', name: 'Samsung Galaxy A14', brand: BRANDS[1] },
+  { id: 's7', name: 'Samsung Galaxy A34', brand: BRANDS[1] },
+  { id: 's8', name: 'Samsung Galaxy A54', brand: BRANDS[1] },
+  { id: 's9', name: 'Samsung Galaxy S24', brand: BRANDS[1], popular: true },
+  { id: 's10', name: 'Samsung Galaxy S24 Ultra', brand: BRANDS[1], popular: true },
+  { id: 's11', name: 'Samsung Galaxy S23 FE', brand: BRANDS[1] },
+  { id: 's12', name: 'Samsung Galaxy S23 Ultra', brand: BRANDS[1] },
+  { id: 's13', name: 'Samsung Galaxy M14', brand: BRANDS[1] },
+  { id: 's14', name: 'Samsung Galaxy M34', brand: BRANDS[1] },
+
+  // iPhone
+  { id: 'i1', name: 'iPhone 16 Pro Max', brand: BRANDS[2], popular: true },
+  { id: 'i2', name: 'iPhone 16 Pro', brand: BRANDS[2], popular: true },
+  { id: 'i3', name: 'iPhone 16', brand: BRANDS[2] },
+  { id: 'i4', name: 'iPhone 15 Pro Max', brand: BRANDS[2], popular: true },
+  { id: 'i5', name: 'iPhone 15 Pro', brand: BRANDS[2] },
+  { id: 'i6', name: 'iPhone 15', brand: BRANDS[2] },
+  { id: 'i7', name: 'iPhone 14 Pro Max', brand: BRANDS[2] },
+  { id: 'i8', name: 'iPhone 14', brand: BRANDS[2] },
+  { id: 'i9', name: 'iPhone 13', brand: BRANDS[2] },
+  { id: 'i10', name: 'iPhone 12', brand: BRANDS[2] },
+  { id: 'i11', name: 'iPhone 11', brand: BRANDS[2] },
+
+  // Xiaomi / Redmi / POCO
+  { id: 'x1', name: 'Redmi Note 13 Pro', brand: BRANDS[3], popular: true },
+  { id: 'x2', name: 'Redmi Note 13', brand: BRANDS[3], popular: true },
+  { id: 'x3', name: 'Redmi Note 12', brand: BRANDS[3] },
+  { id: 'x4', name: 'Redmi 13C', brand: BRANDS[3], popular: true },
+  { id: 'x5', name: 'Redmi A3', brand: BRANDS[3] },
+  { id: 'x6', name: 'POCO X6 Pro', brand: BRANDS[3] },
+  { id: 'x7', name: 'POCO M6 Pro', brand: BRANDS[3] },
+  { id: 'x8', name: 'Xiaomi 14', brand: BRANDS[3] },
+  { id: 'x9', name: 'Xiaomi 13T Pro', brand: BRANDS[3] },
+
+  // Oppo
+  { id: 'o1', name: 'Oppo A18', brand: BRANDS[4], popular: true },
+  { id: 'o2', name: 'Oppo A38', brand: BRANDS[4], popular: true },
+  { id: 'o3', name: 'Oppo A58', brand: BRANDS[4] },
+  { id: 'o4', name: 'Oppo A78', brand: BRANDS[4] },
+  { id: 'o5', name: 'Oppo Reno 11', brand: BRANDS[4] },
+  { id: 'o6', name: 'Oppo Reno 10', brand: BRANDS[4] },
+
+  // Huawei
+  { id: 'h1', name: 'Huawei Nova 12', brand: BRANDS[5], popular: true },
+  { id: 'h2', name: 'Huawei Nova 11i', brand: BRANDS[5] },
+  { id: 'h3', name: 'Huawei P60 Pro', brand: BRANDS[5] },
+  { id: 'h4', name: 'Huawei Y61', brand: BRANDS[5] },
+  { id: 'h5', name: 'Huawei Nova Y90', brand: BRANDS[5] },
+
+  // Realme
+  { id: 'r1', name: 'Realme C67', brand: BRANDS[6], popular: true },
+  { id: 'r2', name: 'Realme C55', brand: BRANDS[6] },
+  { id: 'r3', name: 'Realme 12 Pro', brand: BRANDS[6] },
+  { id: 'r4', name: 'Realme 11', brand: BRANDS[6] },
+  { id: 'r5', name: 'Realme Note 50', brand: BRANDS[6] },
+
+  // Infinix
+  { id: 'inf1', name: 'Infinix Hot 40i', brand: BRANDS[7], popular: true },
+  { id: 'inf2', name: 'Infinix Hot 30', brand: BRANDS[7] },
+  { id: 'inf3', name: 'Infinix Smart 8', brand: BRANDS[7] },
+  { id: 'inf4', name: 'Infinix Note 30', brand: BRANDS[7] },
+  { id: 'inf5', name: 'Infinix Zero 30', brand: BRANDS[7] },
+
+  // Tecno
+  { id: 't1', name: 'Tecno Spark 20 Pro', brand: BRANDS[8], popular: true },
+  { id: 't2', name: 'Tecno Spark 20', brand: BRANDS[8] },
+  { id: 't3', name: 'Tecno Pop 8', brand: BRANDS[8] },
+  { id: 't4', name: 'Tecno Camon 20', brand: BRANDS[8] },
+  { id: 't5', name: 'Tecno Pova 5', brand: BRANDS[8] },
+
+  // Honor
+  { id: 'hon1', name: 'Honor X8b', brand: BRANDS[9], popular: true },
+  { id: 'hon2', name: 'Honor X7b', brand: BRANDS[9] },
+  { id: 'hon3', name: 'Honor 90', brand: BRANDS[9] },
+  { id: 'hon4', name: 'Honor Magic 6 Pro', brand: BRANDS[9] },
 ];
 
 export const PRODUCTS: Product[] = [
