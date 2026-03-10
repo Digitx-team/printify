@@ -65,7 +65,7 @@ export default function Footer() {
         <div>
           <p className="font-sans text-[10px] font-medium tracking-[0.15em] uppercase mb-5" style={{ color: colors.heading }}>{t.nav}</p>
           <div className="flex flex-col gap-2.5">
-            <a href="#products" className="font-sans text-[13px] transition-colors hover:opacity-80" style={{ color: colors.text }}>{t.links.shop}</a>
+            <Link href="/#products" className="font-sans text-[13px] transition-colors hover:opacity-80" style={{ color: colors.text }}>{t.links.shop}</Link>
             <Link href="/create" className="font-sans text-[13px] transition-colors hover:opacity-80" style={{ color: colors.text }}>{t.links.customize}</Link>
             <a href="#" className="font-sans text-[13px] transition-colors hover:opacity-80" style={{ color: colors.text }}>{t.links.story}</a>
           </div>

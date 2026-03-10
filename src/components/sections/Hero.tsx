@@ -66,7 +66,7 @@ export default function Hero() {
 
   const t = {
     badge: locale === 'ar' ? '✦ أغطية حرفية' : locale === 'en' ? '✦ Artisan Cases' : '✦ Coques Artisanales',
-    title: locale === 'ar' ? ['احمل', 'قصتك', 'في كفّك'] : locale === 'en' ? ['Carry your', 'story', 'in your pocket'] : ['Portez votre', 'histoire', 'dans votre poche'],
+    title: locale === 'ar' ? ['الفخامة', 'تبدأ', 'من هاتفك'] : locale === 'en' ? ['Carry your', 'story', 'in your pocket'] : ['Portez votre', 'histoire', 'dans votre poche'],
     subtitle: locale === 'ar'
       ? 'كل غطاء قطعة فنية فريدة، صورة شخصية، خط عربي، رسم مخصص.'
       : locale === 'en'
@@ -77,7 +77,7 @@ export default function Hero() {
       : locale === 'en'
         ? 'Personal photo, Arabic calligraphy, bespoke illustration. Printed with care, delivered with love across Algeria.'
         : 'Photo personnelle, calligraphie arabe, illustration sur mesure. Imprimée avec soin, livrée avec amour dans toute l\'Algérie.',
-    cta: locale === 'ar' ? 'أنشئ غطائي' : locale === 'en' ? 'Create my case' : 'Créer ma coque',
+    cta: locale === 'ar' ? 'أنشئ غطاء هاتفك' : locale === 'en' ? 'Create my case' : 'Créer ma coque',
     see: locale === 'ar' ? 'شاهد الأعمال' : locale === 'en' ? 'See creations' : 'Voir les créations',
     stat1: locale === 'ar' ? 'طلب' : locale === 'en' ? 'Orders' : 'Commandes',
     stat2: locale === 'ar' ? 'تقييم' : locale === 'en' ? 'Rating' : 'Note',
@@ -145,10 +145,10 @@ export default function Hero() {
             <span className="relative z-[1]">{t.cta}</span>
             <span className="relative z-[1] transition-transform group-hover:translate-x-0.5 arrow-flip">→</span>
           </Link>
-          <a href="#products" className="flex items-center gap-2 font-sans text-[11px] tracking-[0.08em] uppercase text-muted hover:text-ink transition-colors">
+          <Link href="/#products" className="flex items-center gap-2 font-sans text-[11px] tracking-[0.08em] uppercase text-muted hover:text-ink transition-colors">
             <span className="w-8 h-8 rounded-full border border-soft flex items-center justify-center text-[10px] hover:border-ink transition-colors">▶</span>
             {t.see}
-          </a>
+          </Link>
         </motion.div>
 
         {/* Stats */}

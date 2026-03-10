@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Download, ChevronRight, X as XIcon, Loader2 } from "lucide-react";
+import { Search, Download, ChevronRight, X as XIcon, Loader2, Eye } from "lucide-react";
 import { fetchAllOrders, updateOrderStatus } from "@/lib/admin-api";
 import { useAdminI18n } from "@/components/admin/AdminI18nProvider";
+import Link from "next/link";
 import clsx from "clsx";
 
 const statusClass: Record<string, string> = {
@@ -35,6 +36,7 @@ interface Order {
   shipping_cost: number;
   created_at: string;
   items_count: number;
+  custom_names: string[];
 }
 
 export default function OrdersTable() {
@@ -63,6 +65,7 @@ export default function OrdersTable() {
         shipping_cost: o.shipping_cost || 0,
         created_at: o.created_at,
         items_count: (o.order_items || []).length,
+        custom_names: (o.order_items || []).map((i: any) => i.custom_name).filter(Boolean),
       })));
     } catch (err) {
       console.error('Failed to load orders:', err);
@@ -167,6 +170,7 @@ export default function OrdersTable() {
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-5 py-3.5">{t("orders.orderId")}</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">{t("orders.customer")}</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">{t("orders.wilaya")}</th>
+                  <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">✏️</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">{t("orders.date")}</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">{t("orders.status")}</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-3 py-3.5">{t("orders.total")}</th>
@@ -176,7 +180,7 @@ export default function OrdersTable() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-sm text-text-muted">
+                    <td colSpan={8} className="text-center py-12 text-sm text-text-muted">
                       {t("orders.noOrders")}
                     </td>
                   </tr>
@@ -184,8 +188,10 @@ export default function OrdersTable() {
                   filtered.map((order) => (
                     <tr key={order.id} className="table-row-hover border-b border-border/50 last:border-0">
                       <td className="px-5 py-3.5">
-                        <p className="text-sm font-semibold text-primary">{order.order_number}</p>
-                        <p className="text-[10px] text-text-muted">{order.items_count} {t("orders.items")}</p>
+                        <Link href={`/admin/orders/${order.id}`} className="group">
+                          <p className="text-sm font-semibold text-primary group-hover:underline">{order.order_number}</p>
+                          <p className="text-[10px] text-text-muted">{order.items_count} {t("orders.items")}</p>
+                        </Link>
                       </td>
                       <td className="px-3 py-3.5">
                         <div>
@@ -195,6 +201,19 @@ export default function OrdersTable() {
                       </td>
                       <td className="px-3 py-3.5">
                         <span className="text-sm text-text-secondary">{order.wilaya}</span>
+                      </td>
+                      <td className="px-3 py-3.5">
+                        {order.custom_names.length > 0 ? (
+                          <div className="flex flex-col gap-0.5">
+                            {order.custom_names.map((name, i) => (
+                              <span key={i} className="inline-flex items-center px-2 py-0.5 bg-violet-50 text-violet-600 text-xs font-medium rounded-md w-fit">
+                                ✏️ {name}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-text-muted">—</span>
+                        )}
                       </td>
                       <td className="px-3 py-3.5">
                         <span className="text-sm text-text-secondary">
@@ -218,6 +237,13 @@ export default function OrdersTable() {
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-center gap-1.5">
+                          <Link
+                            href={`/admin/orders/${order.id}`}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-text-secondary text-xs font-semibold hover:bg-gray-200 transition-all"
+                            title="View details"
+                          >
+                            <Eye size={14} />
+                          </Link>
                           {nextStatus[order.status] && order.status !== "cancelled" && (
                             <button
                               onClick={() => handleNextStep(order.id)}
@@ -235,7 +261,6 @@ export default function OrdersTable() {
                               title={t("orders.cancel")}
                             >
                               <XIcon size={14} />
-                              {t("orders.cancel")}
                             </button>
                           )}
                           {order.status === "delivered" && (

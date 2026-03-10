@@ -12,9 +12,9 @@ import { LOCALES } from '@/lib/i18n';
 import CartDrawer from '@/components/ui/CartDrawer';
 
 const NAV_ITEMS = [
-  { href: '#products', fr: 'Boutique', en: 'Shop', ar: 'المتجر' },
-  { href: '/create', fr: 'Personnaliser', en: 'Customize', ar: 'خصّصي', isLink: true },
-  { href: '#testimonials', fr: 'Avis', en: 'Reviews', ar: 'آراء' },
+  { href: '/store', fr: 'Boutique', en: 'Shop', ar: 'المتجر' },
+  { href: '/create', fr: 'Personnaliser', en: 'Customize', ar: 'خصّصي' },
+  { href: '/#testimonials', fr: 'Avis', en: 'Reviews', ar: 'آراء' },
 ];
 
 export default function Navbar() {
@@ -79,11 +79,7 @@ export default function Navbar() {
               );
               return (
                 <li key={item.href} className="group">
-                  {item.isLink ? (
-                    <Link href={item.href} className="inline-block">{inner}</Link>
-                  ) : (
-                    <a href={item.href}>{inner}</a>
-                  )}
+                  <Link href={item.href} className="inline-block">{inner}</Link>
                 </li>
               );
             })}
@@ -201,17 +197,10 @@ export default function Navbar() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * i }}
                   >
-                    {item.isLink ? (
                       <Link href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center justify-between py-3.5 font-sans text-[13px] text-muted hover:text-ink transition-colors border-b border-soft/10">
-                        {label(item)}
-                        <span className="text-[10px] text-soft arrow-flip">→</span>
-                      </Link>
-                    ) : (
-                      <a href={item.href} onClick={() => setMobileOpen(false)} className="flex items-center justify-between py-3.5 font-sans text-[13px] text-muted hover:text-ink transition-colors border-b border-soft/10">
-                        {label(item)}
-                        <span className="text-[10px] text-soft arrow-flip">→</span>
-                      </a>
-                    )}
+                      {label(item)}
+                      <span className="text-[10px] text-soft arrow-flip">→</span>
+                    </Link>
                   </motion.li>
                 ))}
               </ul>

@@ -7,6 +7,76 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// ─── IMAGE UPLOAD ─────────────────────────────
+
+export async function uploadProductImage(file: File, productId: string, isPrimary = false): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const fileName = `${productId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('product-images')
+    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+  if (uploadError) {
+    console.error('Upload error:', uploadError);
+    throw uploadError;
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('product-images')
+    .getPublicUrl(fileName);
+
+  const imageUrl = urlData.publicUrl;
+
+  // If primary, un-flag all existing primary images first
+  if (isPrimary) {
+    await supabase
+      .from('product_images')
+      .update({ is_primary: false } as any)
+      .eq('product_id', productId)
+      .eq('is_primary', true);
+  }
+
+  // Save to product_images table
+  const { error: dbError } = await supabase
+    .from('product_images')
+    .insert({
+      product_id: productId,
+      image_url: imageUrl,
+      is_primary: isPrimary,
+    } as any);
+
+  if (dbError) {
+    console.error('DB insert error:', dbError);
+  }
+
+  // If primary, also update the product's image_url field
+  if (isPrimary) {
+    await supabase
+      .from('products')
+      .update({ image_url: imageUrl } as any)
+      .eq('id', productId);
+  }
+
+  return imageUrl;
+}
+
+export async function deleteProductImage(imageUrl: string, productId: string) {
+  // Extract file path from URL
+  const urlParts = imageUrl.split('/product-images/');
+  if (urlParts.length > 1) {
+    const filePath = urlParts[1];
+    await supabase.storage.from('product-images').remove([filePath]);
+  }
+
+  // Remove from product_images table
+  await supabase
+    .from('product_images')
+    .delete()
+    .eq('image_url', imageUrl)
+    .eq('product_id', productId);
+}
+
 // ─── PRODUCTS ────────────────────────────────
 
 export async function fetchAllProducts() {
@@ -85,17 +155,34 @@ export async function fetchAllOrders() {
   const orderIds = orders.map(o => o.id);
   const { data: items, error: itemsError } = await supabase
     .from('order_items')
-    .select('id, order_id, quantity, unit_price, is_custom, custom_description, phone_model, product_id')
+    .select('id, order_id, quantity, unit_price, is_custom, custom_description, phone_model, product_id, custom_name')
     .in('order_id', orderIds);
 
   if (itemsError) {
     console.error('fetchOrderItems error:', itemsError);
   }
 
-  // Merge items into orders
+  // Fetch product details for non-custom items
+  const productIds = [...new Set((items || []).filter(i => i.product_id).map(i => i.product_id))];
+  let productsMap: Record<string, { name: string; image_url: string | null }> = {};
+  if (productIds.length > 0) {
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, name, image_url')
+      .in('id', productIds);
+    if (products) {
+      products.forEach((p: any) => { productsMap[p.id] = { name: p.name, image_url: p.image_url }; });
+    }
+  }
+
+  // Merge items + product info into orders
   return orders.map(order => ({
     ...order,
-    order_items: (items || []).filter(item => item.order_id === order.id),
+    order_items: (items || []).filter(item => item.order_id === order.id).map(item => ({
+      ...item,
+      product_name: item.product_id ? productsMap[item.product_id]?.name || null : null,
+      product_image: item.product_id ? productsMap[item.product_id]?.image_url || null : null,
+    })),
   }));
 }
 
@@ -108,6 +195,16 @@ export async function updateOrderStatus(orderId: string, status: string) {
     .single();
   if (error) throw error;
   return data;
+}
+
+// Lightweight query for chart — only needs dates and amounts, no joins
+export async function fetchOrdersForChart() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('created_at, total_amount')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data || [];
 }
 
 // ─── SHIPPING RATES ─────────────────────────

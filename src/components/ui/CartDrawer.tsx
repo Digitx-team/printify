@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, Trash2 } from 'lucide-react';
+import { X, Plus, Minus, Trash2, Smartphone, User } from 'lucide-react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,6 +12,8 @@ export default function CartDrawer() {
   const { isOpen, setIsOpen, items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
   const { locale } = useLanguage();
   const [showOrder, setShowOrder] = useState(false);
+
+  const isExternal = (url: string) => url.startsWith('http');
 
   const t = {
     title: locale === 'ar' ? 'سلة المشتريات' : locale === 'en' ? 'Your Cart' : 'Votre Panier',
@@ -55,22 +57,43 @@ export default function CartDrawer() {
                 ) : (
                   <div className="space-y-4">
                     {items.map((item) => (
-                      <div key={item.product.id} className="flex gap-4 pb-4 border-b border-sand/50">
+                      <div key={item.key} className="flex gap-4 pb-4 border-b border-sand/50">
                         <div className="w-16 h-20 rounded-lg overflow-hidden bg-sand relative shrink-0">
-                          <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="64px" />
+                          <Image
+                            src={item.product.image}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                            unoptimized={isExternal(item.product.image)}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-sans text-sm font-medium text-ink truncate">{item.product.name}</p>
+                          {/* Show phone model */}
+                          {item.phoneModel && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <Smartphone className="w-3 h-3 text-blue-400" />
+                              <span className="font-sans text-[11px] text-muted">{item.phoneModel}</span>
+                            </div>
+                          )}
+                          {/* Show custom name */}
+                          {item.customName && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <User className="w-3 h-3 text-amber-400" />
+                              <span className="font-sans text-[11px] text-muted">{item.customName}</span>
+                            </div>
+                          )}
                           <p className="font-serif text-base text-accent mt-1">{item.product.price.toLocaleString()} DA</p>
                           <div className="flex items-center gap-3 mt-2">
-                            <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="w-7 h-7 border border-sand rounded flex items-center justify-center text-muted hover:text-ink hover:border-ink transition-colors">
+                            <button onClick={() => updateQuantity(item.key, item.quantity - 1)} className="w-7 h-7 border border-sand rounded flex items-center justify-center text-muted hover:text-ink hover:border-ink transition-colors">
                               <Minus className="w-3 h-3" />
                             </button>
                             <span className="font-sans text-sm font-medium text-ink w-5 text-center">{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="w-7 h-7 border border-sand rounded flex items-center justify-center text-muted hover:text-ink hover:border-ink transition-colors">
+                            <button onClick={() => updateQuantity(item.key, item.quantity + 1)} className="w-7 h-7 border border-sand rounded flex items-center justify-center text-muted hover:text-ink hover:border-ink transition-colors">
                               <Plus className="w-3 h-3" />
                             </button>
-                            <button onClick={() => removeItem(item.product.id)} className="ml-auto text-muted hover:text-red-500 transition-colors">
+                            <button onClick={() => removeItem(item.key)} className="ml-auto text-muted hover:text-red-500 transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -94,7 +117,7 @@ export default function CartDrawer() {
                   >
                     <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-400" />
                     <span className="relative z-[1]">{t.checkout}</span>
-                    <span className="relative z-[1] arrow-flip">→</span>
+                    <span className="relative z-[1] arrow-flip">←</span>
                   </button>
                 </div>
               )}

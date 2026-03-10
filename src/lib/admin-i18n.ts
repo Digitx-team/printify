@@ -77,6 +77,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orders.cancelled": "Cancelled",
     "orders.cancel": "Cancel",
     "orders.loading": "Loading orders...",
+    "orders.totalOrders": "Total Orders",
     "orders.storeOrders": "Store Orders",
     "orders.customOrders": "Custom Orders",
     "orders.phone": "Phone",
@@ -164,6 +165,12 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "coupons.used": "Used",
     "coupons.expires": "Expires",
     "coupons.discount": "discount",
+    "coupons.totalCoupons": "Total Coupons",
+    "coupons.editCoupon": "Edit Coupon",
+    "coupons.code": "Code",
+    "coupons.type": "Type",
+    "coupons.value": "Value",
+    "coupons.usageLimit": "Usage Limit",
 
     // Settings
     "settings.title": "Settings",
@@ -322,6 +329,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orderDetail.payment": "Payment",
     "orderDetail.cashOnDelivery": "Cash on Delivery",
     "orderDetail.paymentCollected": "Payment collected upon delivery",
+    "orderDetail.paymentPending": "Payment pending — will be collected on delivery",
 
     // UnderDevelopment extras
     "underDev.description": "This section is currently under development. We're working hard to bring you an amazing experience. Stay tuned!",
@@ -395,6 +403,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orders.cancelled": "Annulée",
     "orders.cancel": "Annuler",
     "orders.loading": "Chargement des commandes...",
+    "orders.totalOrders": "Total des commandes",
     "orders.storeOrders": "Commandes boutique",
     "orders.customOrders": "Commandes personnalisées",
     "orders.phone": "Téléphone",
@@ -482,6 +491,12 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "coupons.used": "Utilisé",
     "coupons.expires": "Expire",
     "coupons.discount": "réduction",
+    "coupons.totalCoupons": "Total coupons",
+    "coupons.editCoupon": "Modifier le coupon",
+    "coupons.code": "Code",
+    "coupons.type": "Type",
+    "coupons.value": "Valeur",
+    "coupons.usageLimit": "Limite d'utilisation",
 
     // Settings
     "settings.title": "Paramètres",
@@ -640,6 +655,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orderDetail.payment": "Paiement",
     "orderDetail.cashOnDelivery": "Paiement à la livraison",
     "orderDetail.paymentCollected": "Paiement collecté à la livraison",
+    "orderDetail.paymentPending": "Paiement en attente — sera collecté à la livraison",
 
     // UnderDevelopment extras
     "underDev.description": "Cette section est en cours de développement. Nous travaillons dur pour vous offrir une expérience exceptionnelle. Restez à l'écoute !",
@@ -713,6 +729,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orders.cancelled": "ملغي",
     "orders.cancel": "إلغاء",
     "orders.loading": "جاري تحميل الطلبات...",
+    "orders.totalOrders": "إجمالي الطلبات",
     "orders.storeOrders": "طلبات المتجر",
     "orders.customOrders": "طلبات مخصصة",
     "orders.phone": "الهاتف",
@@ -800,6 +817,12 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "coupons.used": "مستخدم",
     "coupons.expires": "ينتهي",
     "coupons.discount": "خصم",
+    "coupons.totalCoupons": "إجمالي الكوبونات",
+    "coupons.editCoupon": "تعديل الكوبون",
+    "coupons.code": "الرمز",
+    "coupons.type": "النوع",
+    "coupons.value": "القيمة",
+    "coupons.usageLimit": "حد الاستخدام",
 
     // Settings
     "settings.title": "الإعدادات",
@@ -958,6 +981,7 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "orderDetail.payment": "الدفع",
     "orderDetail.cashOnDelivery": "الدفع عند التسليم",
     "orderDetail.paymentCollected": "يتم تحصيل الدفع عند التسليم",
+    "orderDetail.paymentPending": "الدفع معلق — سيتم التحصيل عند التسليم",
 
     // UnderDevelopment extras
     "underDev.description": "هذا القسم قيد التطوير حالياً. نحن نعمل بجد لتقديم تجربة مميزة لك. ترقبوا!",

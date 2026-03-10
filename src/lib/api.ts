@@ -2,25 +2,49 @@ import { supabase, getSupabase } from './supabase';
 import type { Product } from '@/types';
 
 // ─── Fetch active products from Supabase ───
-// Images are stored as a direct URL field on the product (Firebase Storage)
 export async function fetchProducts(): Promise<Product[]> {
   if (!getSupabase()) return [];
 
-  const { data, error } = await supabase
+  // Try with product_images join first
+  let data: any[] | null = null;
+  let useJoin = true;
+
+  const result = await supabase
     .from('products')
-    .select('id, name, price, category, description, popular, product_images(image_url, is_primary)')
+    .select('id, name, price, category, description, popular, image_url, product_images(image_url, is_primary)')
     .eq('status', 'active')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching products:', error);
-    return [];
+  if (result.error) {
+    console.error('Error fetching products with join:', result.error);
+    // Fallback: fetch without join
+    useJoin = false;
+    const fallback = await supabase
+      .from('products')
+      .select('id, name, price, category, description, popular, image_url')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
+    
+    if (fallback.error) {
+      console.error('Error fetching products:', fallback.error);
+      return [];
+    }
+    data = fallback.data;
+  } else {
+    data = result.data;
   }
 
   return (data || []).map((p: any) => {
-    const imgs = p.product_images || [];
-    const primary = imgs.find((img: any) => img.is_primary);
-    const imageUrl = primary?.image_url || imgs[0]?.image_url || '/products/case-amirah.png';
+    let imageUrl = '/products/case-amirah.png'; // ultimate fallback
+
+    if (useJoin) {
+      const imgs = p.product_images || [];
+      const primary = imgs.find((img: any) => img.is_primary);
+      imageUrl = primary?.image_url || imgs[0]?.image_url || p.image_url || imageUrl;
+    } else {
+      imageUrl = p.image_url || imageUrl;
+    }
+
     return {
       id: p.id,
       name: p.name,
@@ -59,12 +83,12 @@ export interface OrderSubmission {
   notes: string;
   items: {
     productId: string;
-    phoneModelName: string; // hardcoded model name, not DB id
+    phoneModel: string;
+    customName: string;
     quantity: number;
     unitPrice: number;
     isCustom?: boolean;
     customDescription?: string;
-    designImages?: string[]; // Firebase Storage URLs
   }[];
   totalAmount: number;
   shippingCost: number;
@@ -95,18 +119,19 @@ export async function submitOrder(order: OrderSubmission) {
     throw new Error('Failed to create order');
   }
 
-  // 2. Create order items
+  // 2. Create order items with all details
   const orderItems = order.items.map(item => ({
     order_id: orderData.id,
-    product_id: item.isCustom ? null : item.productId,
-    phone_model_id: null, // TODO: resolve phoneModelName to phone_model_id via lookup
+    product_id: item.isCustom ? null : (item.productId || null),
+    phone_model: item.phoneModel || null,
+    custom_name: item.customName || null,
     quantity: item.quantity,
     unit_price: item.unitPrice,
     is_custom: item.isCustom || false,
-    custom_description: item.customDescription || '',
+    custom_description: item.customDescription || null,
   }));
 
-  const { data: itemsData, error: itemsError } = await supabase
+  const { error: itemsError } = await supabase
     .from('order_items')
     .insert(orderItems)
     .select('id');
@@ -115,8 +140,6 @@ export async function submitOrder(order: OrderSubmission) {
     console.error('Error creating order items:', itemsError);
     throw new Error('Failed to create order items');
   }
-
-  // Design images for regular orders should be uploaded to Supabase Storage
 
   return {
     orderId: orderData.id,
@@ -133,10 +156,39 @@ export interface CustomOrderSubmission {
   brandSlug: string;
   phoneModel: string;
   description: string;
+  photos?: File[];
 }
 
 export async function submitCustomOrder(order: CustomOrderSubmission) {
   if (!getSupabase()) throw new Error('Supabase is not configured');
+
+  // Upload images to Supabase Storage if any
+  let imageUrls: string[] = [];
+  if (order.photos && order.photos.length > 0) {
+    const uploadPromises = order.photos.map(async (file, index) => {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `${Date.now()}_${index}.${ext}`;
+      const filePath = `custom-designs/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('order-images')
+        .upload(filePath, file, { contentType: file.type, upsert: false });
+
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        return null;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('order-images')
+        .getPublicUrl(filePath);
+
+      return urlData?.publicUrl || null;
+    });
+
+    const results = await Promise.all(uploadPromises);
+    imageUrls = results.filter((url): url is string => url !== null);
+  }
 
   const { data, error } = await supabase
     .from('custom_orders')
@@ -148,6 +200,7 @@ export async function submitCustomOrder(order: CustomOrderSubmission) {
       brand_slug: order.brandSlug,
       phone_model: order.phoneModel,
       description: order.description,
+      image_urls: imageUrls.length > 0 ? imageUrls : null,
       status: 'new',
     })
     .select('id')

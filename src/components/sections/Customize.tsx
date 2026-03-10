@@ -149,10 +149,10 @@ export default function Customize() {
                   }`}
                 >
                   <div className="text-2xl mb-2">☁️</div>
-                  <p className="font-sans text-xs text-muted">
+                  <p className="font-sans text-xs text-ink/60">
                     <strong className="text-accent">{t.upload}</strong><br />{t.uploadSub}
                   </p>
-                  <p className="font-sans text-[10px] text-muted tracking-wider mt-1">JPG · PNG · PDF · max 10MB</p>
+                  <p className="font-sans text-[10px] text-ink/50 tracking-wider mt-1">JPG · PNG · PDF · max 10MB</p>
                 </div>
               </label>
               <input ref={fileInputRef} type="file" id="fileInput" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />

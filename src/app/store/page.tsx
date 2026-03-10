@@ -3,134 +3,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Heart, ShoppingBag, Loader2, X, ChevronDown, Check, ArrowLeft } from 'lucide-react';
+import { Heart, ShoppingBag, Loader2, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCart } from '@/context/CartContext';
 import { fetchProducts } from '@/lib/api';
-import { BRANDS, PHONE_MODELS } from '@/lib/constants';
 import type { Product } from '@/types';
 import Link from 'next/link';
+import ProductOverlay from '@/components/ui/ProductOverlay';
 
-/* ─── Product Overlay (phone model picker) ─── */
-function ProductOverlay({
-  product, locale, onClose, onConfirm,
-}: {
-  product: Product; locale: string;
-  onClose: () => void;
-  onConfirm: (product: Product, model: string, customName: string) => void;
-}) {
-  const [selectedBrand, setSelectedBrand] = useState('iphone');
-  const [selectedModel, setSelectedModel] = useState('');
-  const [customName, setCustomName] = useState('');
-  const [brandOpen, setBrandOpen] = useState(false);
-  const [modelOpen, setModelOpen] = useState(false);
-  const filteredModels = PHONE_MODELS.filter(m => m.brand.id === selectedBrand);
-  const canConfirm = selectedModel !== '';
-
-  const t = {
-    title: locale === 'ar' ? 'اختر موديل هاتفك' : locale === 'en' ? 'Choose your phone model' : 'Choisissez votre modèle',
-    brand: locale === 'ar' ? 'الماركة' : locale === 'en' ? 'Brand' : 'Marque',
-    model: locale === 'ar' ? 'الموديل' : locale === 'en' ? 'Model' : 'Modèle',
-    selectBrand: locale === 'ar' ? 'اختر الماركة' : locale === 'en' ? 'Select brand' : 'Sélectionner la marque',
-    selectModel: locale === 'ar' ? 'اختر الموديل' : locale === 'en' ? 'Select model' : 'Sélectionner le modèle',
-    customName: locale === 'ar' ? 'الاسم المطلوب على الغطاء' : locale === 'en' ? 'Name on the case' : 'Nom sur la coque',
-    customPlaceholder: locale === 'ar' ? 'مثال: أميرة' : locale === 'en' ? 'e.g. Amirah' : 'ex: Amirah',
-    confirm: locale === 'ar' ? 'أضف للسلة' : locale === 'en' ? 'Add to cart' : 'Ajouter au panier',
-    price: locale === 'ar' ? 'دج' : 'DA',
-  };
-
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-ink/50 backdrop-blur-sm" />
-      <motion.div initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 30 }} transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="relative w-full max-w-[440px] bg-white rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.25)] overflow-hidden"
-        onClick={e => e.stopPropagation()}>
-
-        <button onClick={onClose} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
-          <X className="w-4 h-4 text-muted" />
-        </button>
-
-        {/* Product preview */}
-        <div className="flex items-center gap-4 p-5 border-b border-soft/20">
-          <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 shadow-sm">
-            <Image src={product.image} alt={product.name} fill className="object-cover" sizes="80px" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-serif text-lg font-light text-ink truncate">{product.name}</p>
-            <p className="font-serif text-xl font-normal text-accent">
-              {product.price.toLocaleString()} <span className="font-sans text-xs text-muted">{t.price}</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Form */}
-        <div className="p-5 space-y-4">
-          <p className="font-sans text-[11px] tracking-[0.1em] uppercase text-muted font-medium">{t.title}</p>
-
-          {/* Brand */}
-          <div className="relative">
-            <label className="font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5 block">{t.brand}</label>
-            <button onClick={() => { setBrandOpen(!brandOpen); setModelOpen(false); }}
-              className="w-full flex items-center justify-between px-4 py-3 bg-cream rounded-xl border border-soft/30 font-sans text-[13px] text-ink hover:border-accent/40 transition-colors">
-              <span>{BRANDS.find(b => b.id === selectedBrand)?.label || t.selectBrand}</span>
-              <ChevronDown className={`w-4 h-4 text-muted transition-transform ${brandOpen ? 'rotate-180' : ''}`} />
-            </button>
-            <AnimatePresence>
-              {brandOpen && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                  className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-soft/30 shadow-lg z-20 overflow-hidden max-h-[200px] overflow-y-auto">
-                  {BRANDS.filter(b => b.id !== 'all').map(b => (
-                    <button key={b.id} onClick={() => { setSelectedBrand(b.id); setSelectedModel(''); setBrandOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 font-sans text-[13px] hover:bg-cream transition-colors flex items-center justify-between ${selectedBrand === b.id ? 'text-accent font-medium' : 'text-ink'}`}>
-                      {b.label}
-                      {selectedBrand === b.id && <Check className="w-4 h-4 text-accent" />}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Model */}
-          <div className="relative">
-            <label className="font-sans text-[10px] tracking-[0.1em] uppercase text-muted mb-1.5 block">{t.model}</label>
-            <button onClick={() => { setModelOpen(!modelOpen); setBrandOpen(false); }}
-              className="w-full flex items-center justify-between px-4 py-3 bg-cream rounded-xl border border-soft/30 font-sans text-[13px] text-ink hover:border-accent/40 transition-colors">
-              <span className={selectedModel ? 'text-ink' : 'text-muted'}>{selectedModel || t.selectModel}</span>
-              <ChevronDown className={`w-4 h-4 text-muted transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
-            </button>
-            <AnimatePresence>
-              {modelOpen && (
-                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                  className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-soft/30 shadow-lg z-20 overflow-hidden max-h-[200px] overflow-y-auto scrollbar-hide">
-                  {filteredModels.map(m => (
-                    <button key={m.id} onClick={() => { setSelectedModel(m.name); setModelOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 font-sans text-[13px] hover:bg-cream transition-colors flex items-center justify-between ${selectedModel === m.name ? 'text-accent font-medium' : 'text-ink'}`}>
-                      <span>{m.name} {m.popular && <span className="ml-2 text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full">⭐</span>}</span>
-                      {selectedModel === m.name && <Check className="w-4 h-4 text-accent" />}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Confirm */}
-          <button onClick={() => canConfirm && onConfirm(product, selectedModel, customName)}
-            disabled={!canConfirm}
-            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-sans text-[11px] tracking-[0.1em] uppercase font-medium transition-all duration-200 ${
-              canConfirm ? 'bg-ink text-cream hover:bg-accent shadow-sm' : 'bg-soft/30 text-muted cursor-not-allowed'
-            }`}>
-            <ShoppingBag className="w-4 h-4" />
-            {t.confirm}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
 
 /* ─── Store Page ─── */
 export default function StorePage() {
@@ -150,11 +30,7 @@ export default function StorePage() {
   };
 
   const handleConfirm = (product: Product, model: string, customName: string) => {
-    const customProduct: Product = {
-      ...product,
-      name: customName ? `${product.name} — ${model} — ${customName}` : `${product.name} — ${model}`,
-    };
-    addItem(customProduct);
+    addItem(product, model, customName);
     setSelectedProduct(null);
   };
 
@@ -217,7 +93,7 @@ export default function StorePage() {
                     <Heart className={`w-3.5 h-3.5 transition-colors ${liked.has(product.id) ? 'fill-red-400 text-red-400' : 'text-muted'}`} />
                   </button>
                   <Image src={product.image} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" unoptimized={product.image.startsWith('http')} />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 via-ink/30 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:flex">
                     <button onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}
                       className="w-full flex items-center justify-center gap-2 bg-cream/95 text-ink py-2.5 text-center font-sans text-[10px] tracking-[0.1em] uppercase font-medium rounded-lg hover:bg-white transition-colors shadow-sm">

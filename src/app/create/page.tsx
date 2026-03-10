@@ -81,6 +81,7 @@ export default function CreatePage() {
         brandSlug: finalBrandSlug,
         phoneModel: finalPhoneModel,
         description,
+        photos: photos.map(p => p.file),
       });
       setSubmitted(true);
       setTimeout(() => {
@@ -297,10 +298,10 @@ export default function CreatePage() {
               ) : step === 'design' ? (
                 <motion.div key="design" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.3 }}>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="block font-sans text-[10px] tracking-[0.12em] uppercase text-muted">
+                    <label className="block font-sans text-[10px] tracking-[0.12em] uppercase font-medium mb-2" style={{ color: isDark ? '#A0A4AB' : '#4B5563' }}>
                       {locale === 'ar' ? 'ارفع تصميمك' : locale === 'en' ? 'Upload your design' : 'Uploadez votre design'}
                     </label>
-                    <span className="font-sans text-[10px] text-muted">{photos.length} / {MAX_PHOTOS}</span>
+                    <span className="font-sans text-[10px]" style={{ color: isDark ? '#8B8F96' : '#6B7280' }}>{photos.length} / {MAX_PHOTOS}</span>
                   </div>
 
                   {/* Photo grid */}
@@ -328,8 +329,8 @@ export default function CreatePage() {
                           background: isDragOver ? (isDark ? 'rgba(0,212,255,0.06)' : 'rgba(0,212,255,0.05)') : (isDark ? 'rgba(22,23,26,0.5)' : 'rgba(226,228,233,0.3)'),
                         }}
                       >
-                        <Upload className="w-5 h-5 text-muted mb-1" />
-                        <span className="font-sans text-[9px] text-muted tracking-wider uppercase">
+                        <Upload className="w-5 h-5 mb-1" style={{ color: isDark ? '#8B8F96' : '#6B7280' }} />
+                        <span className="font-sans text-[9px] tracking-wider uppercase" style={{ color: isDark ? '#8B8F96' : '#6B7280' }}>
                           {photos.length === 0 ? (locale === 'ar' ? 'رفع' : locale === 'en' ? 'Upload' : 'Uploader') : `+${MAX_PHOTOS - photos.length}`}
                         </span>
                       </label>
@@ -337,13 +338,13 @@ export default function CreatePage() {
                   </div>
 
                   <input ref={fileInputRef} type="file" id="fileInput" accept="image/*" multiple className="hidden" onChange={(e) => e.target.files && handleFiles(e.target.files)} />
-                  <p className="font-sans text-[10px] text-muted mt-3">
+                  <p className="font-sans text-[10px] mt-3" style={{ color: isDark ? '#8B8F96' : '#6B7280' }}>
                     {locale === 'ar' ? 'حتى 3 صور · JPG · PNG · max 10MB' : locale === 'en' ? 'Up to 3 photos · JPG · PNG · max 10MB' : 'Jusqu\'à 3 photos · JPG · PNG · max 10 Mo'}
                   </p>
 
                   {/* Description */}
                   <div className="mt-6">
-                    <label className="block font-sans text-[10px] tracking-[0.12em] uppercase text-muted mb-2">{t.descLabel}</label>
+                    <label className="block font-sans text-[10px] tracking-[0.12em] uppercase font-medium mb-2" style={{ color: isDark ? '#A0A4AB' : '#4B5563' }}>{t.descLabel}</label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
@@ -367,11 +368,11 @@ export default function CreatePage() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-sans text-[10px] tracking-[0.12em] uppercase text-muted mb-1.5">{t.name}</label>
+                        <label className="block font-sans text-[10px] tracking-[0.12em] uppercase font-medium mb-1.5" style={{ color: isDark ? '#A0A4AB' : '#4B5563' }}>{t.name}</label>
                         <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} className="w-full h-[44px] rounded-lg px-4 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors" style={{ background: inputBg, border: `1px solid ${inputBorder}` }} />
                       </div>
                       <div>
-                        <label className="block font-sans text-[10px] tracking-[0.12em] uppercase text-muted mb-1.5">{t.phone}</label>
+                        <label className="block font-sans text-[10px] tracking-[0.12em] uppercase font-medium mb-1.5" style={{ color: isDark ? '#A0A4AB' : '#4B5563' }}>{t.phone}</label>
                         <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} className="w-full h-[44px] rounded-lg px-4 font-sans text-[13px] text-ink outline-none focus:border-accent transition-colors" style={{ background: inputBg, border: `1px solid ${inputBorder}` }} type="tel" placeholder="06 XX XX XX XX" />
                       </div>
                     </div>
@@ -411,7 +412,7 @@ export default function CreatePage() {
           {/* Sidebar — Live preview */}
           <div className="hidden lg:block">
             <div className="sticky top-[110px] rounded-xl p-6 transition-all" style={{ background: cardBg, border: `1px solid ${cardBorder}`, boxShadow: isDark ? '0 8px 40px rgba(0,0,0,0.3)' : '0 8px 40px rgba(44,31,20,0.06)' }}>
-              <p className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted mb-4 text-center">{t.preview}</p>
+              <p className="font-sans text-[10px] tracking-[0.12em] uppercase mb-4 text-center" style={{ color: isDark ? '#8B8F96' : '#6B7280' }}>{t.preview}</p>
               <div className="relative w-[140px] h-[280px] mx-auto">
                 <div className="absolute inset-0 rounded-[24px] bg-[#111111] shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
                   <div className="absolute top-[6%] left-1/2 -translate-x-1/2 w-[35%] h-[4%] bg-[#111111] rounded-full z-10" />

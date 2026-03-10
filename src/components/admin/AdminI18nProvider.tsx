@@ -18,12 +18,17 @@ const AdminI18nContext = createContext<AdminI18nContextType>({
 });
 
 export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<AdminLocale>(() => {
-    if (typeof window !== "undefined") {
-      return (localStorage.getItem("admin-locale") as AdminLocale) || "ar";
+  const [locale, setLocaleState] = useState<AdminLocale>("ar");
+  const [mounted, setMounted] = useState(false);
+
+  // Hydrate from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
+    const saved = localStorage.getItem("admin-locale") as AdminLocale;
+    if (saved && saved !== locale) {
+      setLocaleState(saved);
     }
-    return "ar";
-  });
+    setMounted(true);
+  }, []);
 
   const setLocale = useCallback((newLocale: AdminLocale) => {
     setLocaleState(newLocale);

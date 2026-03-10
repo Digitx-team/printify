@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Upload, Plus, X as XIcon, Save, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, Upload, Plus, X as XIcon, Save, Loader2, ImageIcon } from "lucide-react";
 import { useAdminI18n } from "@/components/admin/AdminI18nProvider";
-import { createProduct } from "@/lib/admin-api";
+import { createProduct, uploadProductImage } from "@/lib/admin-api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import clsx from "clsx";
+
+interface ImagePreview {
+  file: File;
+  previewUrl: string;
+}
 
 export default function ProductForm() {
   const [form, setForm] = useState({
@@ -19,6 +25,9 @@ export default function ProductForm() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [images, setImages] = useState<ImagePreview[]>([]);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useAdminI18n();
   const router = useRouter();
 
@@ -37,6 +46,38 @@ export default function ProductForm() {
     setForm(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newImages = files
+      .filter(f => f.type.startsWith('image/'))
+      .map(file => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+    setImages(prev => [...prev, ...newImages]);
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[index].previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const newImages = files
+      .filter(f => f.type.startsWith('image/'))
+      .map(file => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+    setImages(prev => [...prev, ...newImages]);
+  };
+
   const handleSave = async () => {
     if (!form.name.trim()) {
       setError(t("productForm.productName") + " is required");
@@ -50,7 +91,8 @@ export default function ProductForm() {
     setError("");
     setSaving(true);
     try {
-      await createProduct({
+      // 1. Create the product
+      const product = await createProduct({
         name: form.name.trim(),
         price: parseFloat(form.price),
         description: form.description.trim(),
@@ -58,13 +100,24 @@ export default function ProductForm() {
         stock: form.stock ? parseInt(form.stock) : 0,
         sku: form.sku.trim(),
       });
+
+      // 2. Upload images if any
+      if (images.length > 0) {
+        for (let i = 0; i < images.length; i++) {
+          setUploadProgress(`Uploading image ${i + 1}/${images.length}...`);
+          await uploadProductImage(images[i].file, product.id, i === 0);
+        }
+      }
+
       setSaved(true);
+      setUploadProgress("");
       setTimeout(() => {
         router.push("/admin/products");
       }, 1000);
     } catch (err: any) {
       console.error("Save product error:", err);
       setError(err?.message || "Failed to save product");
+      setUploadProgress("");
     } finally {
       setSaving(false);
     }
@@ -83,14 +136,14 @@ export default function ProductForm() {
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="text-sm font-medium text-emerald-600">{t("productForm.saved")}</span>}
-          {error && <span className="text-sm font-medium text-red-500">{error}</span>}
+          {error && <span className="text-sm font-medium text-red-500 max-w-[200px] truncate">{error}</span>}
           <button
             onClick={handleSave}
             disabled={saving}
             className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
           >
             {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            {saving ? t("products.saving") : t("productForm.saveProduct")}
+            {saving ? (uploadProgress || "Saving...") : t("productForm.saveProduct")}
           </button>
         </div>
       </div>
@@ -112,12 +165,61 @@ export default function ProductForm() {
             </div>
           </div>
 
+          {/* Images Section */}
           <div className="bg-white rounded-2xl border border-border p-5 lg:p-6">
             <h3 className="text-base font-semibold text-text-primary mb-4">{t("productForm.images")}</h3>
-            <div className="border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/40 transition-colors cursor-pointer">
-              <Upload size={32} className="mx-auto text-text-muted mb-3" />
-              <p className="text-sm font-medium text-text-primary">{t("productForm.dragDrop")}</p>
-              <p className="text-xs text-text-muted mt-1">{t("productForm.orBrowse")}</p>
+            
+            {/* Image Previews */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-4">
+                {images.map((img, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
+                    <Image src={img.previewUrl} alt={`Preview ${i + 1}`} fill className="object-cover" sizes="150px" />
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-600"
+                    >
+                      <XIcon size={12} />
+                    </button>
+                    {i === 0 && (
+                      <span className="absolute bottom-1.5 left-1.5 text-[9px] bg-primary text-white px-2 py-0.5 rounded-full font-semibold">
+                        Primary
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload Area */}
+            <div
+              className="border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/40 transition-colors cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              {images.length === 0 ? (
+                <>
+                  <Upload size={32} className="mx-auto text-text-muted mb-3" />
+                  <p className="text-sm font-medium text-text-primary">{t("productForm.dragDrop")}</p>
+                  <p className="text-xs text-text-muted mt-1">{t("productForm.orBrowse")}</p>
+                </>
+              ) : (
+                <>
+                  <ImageIcon size={24} className="mx-auto text-text-muted mb-2" />
+                  <p className="text-sm text-text-muted">
+                    {images.length} image{images.length > 1 ? 's' : ''} selected — click to add more
+                  </p>
+                </>
+              )}
             </div>
           </div>
 

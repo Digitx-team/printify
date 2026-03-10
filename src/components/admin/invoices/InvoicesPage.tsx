@@ -62,7 +62,10 @@ export default function InvoicesPage() {
         }));
         setInvoices(generatedInvoices);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error('Failed to fetch invoices:', err);
+        setInvoices([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

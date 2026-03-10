@@ -25,7 +25,10 @@ export default function ShippingPage() {
   useEffect(() => {
     fetchShippingRates()
       .then(data => setWilayas(data as ShippingRate[]))
-      .catch(console.error)
+      .catch((err) => {
+        console.error('Failed to fetch shipping rates:', err);
+        setWilayas([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

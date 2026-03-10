@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
-import { fetchAllOrders } from "@/lib/admin-api";
+import { fetchOrdersForChart } from "@/lib/admin-api";
 import { useAdminI18n } from "@/components/admin/AdminI18nProvider";
 import { Loader2 } from "lucide-react";
 
@@ -16,7 +16,8 @@ export default function RevenueChart() {
   const { t } = useAdminI18n();
 
   useEffect(() => {
-    fetchAllOrders()
+    const emptyData = MONTHS.map((month) => ({ month, revenue: 0, orders: 0 }));
+    fetchOrdersForChart()
       .then((orders) => {
         const monthMap: Record<string, { revenue: number; orders: number }> = {};
         MONTHS.forEach((m) => (monthMap[m] = { revenue: 0, orders: 0 }));
@@ -30,12 +31,15 @@ export default function RevenueChart() {
         });
         setChartData(MONTHS.map((month) => ({ month, revenue: monthMap[month].revenue, orders: monthMap[month].orders })));
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error('Failed to fetch orders for chart:', err);
+        setChartData(emptyData);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div className="bg-white rounded-2xl border border-border p-5 lg:p-6 animate-fade-in-up opacity-0 animate-delay-2">
+    <div className="bg-white rounded-2xl border border-border p-5 lg:p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-base font-semibold text-text-primary">{t("dashboard.revenueOverview")}</h3>
@@ -52,7 +56,7 @@ export default function RevenueChart() {
           </div>
         </div>
       </div>
-      <div className="h-[300px] -ml-2">
+      <div className="h-[300px] w-full" style={{ minHeight: 300, minWidth: 0 }}>
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <Loader2 size={24} className="animate-spin text-primary" />

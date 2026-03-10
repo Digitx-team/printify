@@ -68,17 +68,13 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
         wilaya: formWilaya,
         address: formAddress.trim(),
         notes: formNotes.trim(),
-        items: items.map(item => {
-          // Extract model name from product name format: 'Product — Model' or 'Product — Model — Custom'
-          const parts = item.product.name.split(' — ');
-          const phoneModelName = parts.length > 1 ? parts[1] : '';
-          return {
-            productId: item.product.id,
-            phoneModelName,
-            quantity: item.quantity,
-            unitPrice: item.product.price,
-          };
-        }),
+        items: items.map(item => ({
+          productId: item.product.id,
+          phoneModel: item.phoneModel || '',
+          customName: item.customName || '',
+          quantity: item.quantity,
+          unitPrice: item.product.price,
+        })),
         totalAmount: grandTotal,
         shippingCost,
       });
@@ -137,12 +133,18 @@ export default function OrderModal({ onClose }: { onClose: () => void }) {
               {/* Items with phone model dropdown */}
               <div className="space-y-4 mb-6 pb-6 border-b border-sand">
                 {items.map((item) => (
-                  <div key={item.product.id} className="flex items-center gap-3">
+                  <div key={item.key} className="flex items-center gap-3">
                     <div className="w-12 h-14 rounded-lg overflow-hidden bg-sand relative shrink-0">
-                      <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="48px" />
+                      <Image src={item.product.image} alt={item.product.name} fill className="object-cover" sizes="48px" unoptimized={item.product.image.startsWith('http')} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-[13px] font-medium text-ink truncate">{item.product.name}</p>
+                      {item.phoneModel && (
+                        <p className="font-sans text-[11px] text-muted">📱 {item.phoneModel}</p>
+                      )}
+                      {item.customName && (
+                        <p className="font-sans text-[11px] text-muted">✏️ {item.customName}</p>
+                      )}
                       <p className="font-serif text-sm text-accent">{item.product.price.toLocaleString()} DA <span className="font-sans text-[11px] text-muted font-normal">×{item.quantity}</span></p>
                     </div>
                     <span className="font-serif text-sm text-ink shrink-0">{(item.product.price * item.quantity).toLocaleString()} DA</span>
