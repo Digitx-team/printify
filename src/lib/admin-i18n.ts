@@ -183,6 +183,10 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "settings.currency": "Currency",
     "settings.timezone": "Timezone",
     "settings.language": "Language",
+    "settings.phone": "Phone",
+    "settings.social": "Social & Tracking",
+    "settings.saving": "Saving...",
+    "settings.loading": "Loading settings...",
     "settings.saveChanges": "Save Changes",
     "settings.saved": "✓ Settings saved successfully",
 
@@ -509,6 +513,10 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "settings.currency": "Devise",
     "settings.timezone": "Fuseau horaire",
     "settings.language": "Langue",
+    "settings.phone": "Téléphone",
+    "settings.social": "Réseaux sociaux",
+    "settings.saving": "Enregistrement...",
+    "settings.loading": "Chargement des paramètres...",
     "settings.saveChanges": "Enregistrer",
     "settings.saved": "✓ Paramètres enregistrés",
 
@@ -835,6 +843,10 @@ export const translations: Record<AdminLocale, Record<string, string>> = {
     "settings.currency": "العملة",
     "settings.timezone": "المنطقة الزمنية",
     "settings.language": "اللغة",
+    "settings.phone": "الهاتف",
+    "settings.social": "وسائل التواصل",
+    "settings.saving": "جاري الحفظ...",
+    "settings.loading": "جاري تحميل الإعدادات...",
     "settings.saveChanges": "حفظ التعديلات",
     "settings.saved": "✓ تم حفظ الإعدادات بنجاح",
 

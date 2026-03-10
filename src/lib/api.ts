@@ -201,7 +201,7 @@ export async function submitCustomOrder(order: CustomOrderSubmission) {
       phone_model: order.phoneModel,
       description: order.description,
       image_urls: imageUrls.length > 0 ? imageUrls : null,
-      status: 'new',
+      status: 'pending',
     })
     .select('id')
     .single();

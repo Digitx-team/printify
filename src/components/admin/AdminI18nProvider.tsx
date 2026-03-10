@@ -57,6 +57,14 @@ export function AdminI18nProvider({ children }: { children: React.ReactNode }) {
     }
   }, [locale, dir]);
 
+  if (!mounted) {
+    return (
+      <AdminI18nContext.Provider value={{ locale, setLocale, t, dir }}>
+        <div style={{ minHeight: "100vh" }} />
+      </AdminI18nContext.Provider>
+    );
+  }
+
   return (
     <AdminI18nContext.Provider value={{ locale, setLocale, t, dir }}>
       {children}

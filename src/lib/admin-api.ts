@@ -337,7 +337,7 @@ export async function fetchDashboardStats() {
   const totalProducts = products.length;
   const activeProducts = products.filter(p => p.status === 'active').length;
   const totalCustomOrders = customOrders.length;
-  const newCustomOrders = customOrders.filter((o: any) => o.status === 'new').length;
+  const newCustomOrders = customOrders.filter((o: any) => o.status === 'pending').length;
 
   return {
     totalRevenue,
@@ -373,8 +373,7 @@ export async function getStoreSetting(key: string): Promise<string> {
 export async function updateStoreSetting(key: string, value: string) {
   const { error } = await supabase
     .from('store_settings' as any)
-    .update({ value, updated_at: new Date().toISOString() })
-    .eq('key', key);
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
   if (error) throw error;
 }
 

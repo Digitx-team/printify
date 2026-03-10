@@ -18,6 +18,7 @@ export default function AdminLayout({
     <div
       id="admin-root"
       dir="ltr"
+      suppressHydrationWarning
       style={{
         fontFamily: '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif',
       }}
