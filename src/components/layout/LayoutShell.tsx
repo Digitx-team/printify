@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FacebookPixel from "@/components/tracking/FacebookPixel";
 import { useLanguage } from "@/context/LanguageContext";
+import WhatsAppButton from "@/components/ui/WhatsAppButton";
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -36,6 +37,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       <Navbar />
       <main>{children}</main>
       <Footer />
+      <WhatsAppButton />
     </>
   );
 }
