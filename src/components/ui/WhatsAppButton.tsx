@@ -45,7 +45,6 @@ export default function WhatsAppButton() {
           paddingInline: hovered ? 14 : 0,
           paddingBlock: hovered ? 8 : 0,
           background: 'rgba(37,211,102,0.95)',
-          backdropFilter: 'blur(8px)',
         }}
       >
         {label}
@@ -64,13 +63,13 @@ export default function WhatsAppButton() {
         </svg>
       </span>
 
-      {/* Pulse ring */}
+      {/* Pulse ring — lighter animation than animate-ping */}
       <span
-        className="absolute w-14 h-14 rounded-full animate-ping pointer-events-none"
+        className="absolute w-14 h-14 rounded-full pointer-events-none"
         style={{
           background: 'rgba(37,211,102,0.3)',
           right: 0,
-          animationDuration: '2s',
+          animation: 'pulse-glow 2.5s ease-in-out infinite',
         }}
       />
     </a>

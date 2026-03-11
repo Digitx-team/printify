@@ -30,7 +30,7 @@ export default function CartDrawer() {
           <>
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-ink/30 backdrop-blur-sm z-[210]"
+              className="fixed inset-0 bg-ink/50 z-[210]"
               onClick={() => setIsOpen(false)}
             />
             <motion.div
@@ -113,11 +113,17 @@ export default function CartDrawer() {
                   </div>
                   <button
                     onClick={() => { setIsOpen(false); setShowOrder(true); }}
-                    className="group relative w-full bg-ink text-cream py-4 font-sans text-xs tracking-[0.12em] uppercase font-medium flex items-center justify-center gap-2 overflow-hidden"
+                    className="group relative w-full bg-ink text-cream py-4 font-sans text-xs tracking-[0.12em] uppercase font-medium flex items-center justify-center gap-2 overflow-hidden rounded-xl"
                   >
                     <span className="absolute inset-0 bg-accent -translate-x-full group-hover:translate-x-0 transition-transform duration-400" />
                     <span className="relative z-[1]">{t.checkout}</span>
                     <span className="relative z-[1] arrow-flip">←</span>
+                  </button>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-full mt-2.5 py-3 font-sans text-[11px] tracking-[0.08em] uppercase text-muted hover:text-accent transition-colors text-center"
+                  >
+                    {t.continue}
                   </button>
                 </div>
               )}

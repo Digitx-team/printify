@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -31,6 +31,82 @@ const SLIDES = [
 ];
 
 const AUTOPLAY_MS = 5000;
+
+/* ─── Letter-by-letter (or word-by-word for Arabic) animated text ─── */
+const IS_ARABIC = /[\u0600-\u06FF]/;
+
+function TypedText({
+  text,
+  delay = 0,
+  className,
+  style,
+  isGradient = false,
+}: {
+  text: string;
+  delay?: number;
+  className?: string;
+  style?: React.CSSProperties;
+  isGradient?: boolean;
+}) {
+  const isArabic = IS_ARABIC.test(text);
+  // Arabic: animate word-by-word to preserve cursive connections
+  // Latin: animate letter-by-letter
+  const segments = useMemo(
+    () => (isArabic ? text.split(' ') : text.split('')),
+    [text, isArabic],
+  );
+
+  const container = {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: isArabic ? 0.15 : 0.04,
+        delayChildren: delay,
+      },
+    },
+  };
+
+  const child = {
+    hidden: { opacity: 0, y: 8 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: isArabic ? 0.3 : 0.15, ease: 'easeOut' as const },
+    },
+  };
+
+  return (
+    <motion.span
+      variants={container}
+      initial="hidden"
+      animate="visible"
+      className={className}
+      style={{ ...style, display: 'inline-block' }}
+    >
+      {segments.map((seg, i) => (
+        <motion.span
+          key={`${seg}-${i}`}
+          variants={child}
+          style={{ display: 'inline-block' }}
+          className={isGradient ? 'bg-gradient-to-r from-cyan-400 to-teal-300 bg-clip-text text-transparent' : ''}
+        >
+          {isArabic ? (i < segments.length - 1 ? seg + '\u00A0' : seg) : (seg === ' ' ? '\u00A0' : seg)}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+}
+
+// Helper: get segment count for delay calculation
+function getSegmentCount(text: string) {
+  return IS_ARABIC.test(text) ? text.split(' ').length : text.length;
+}
+
+// Helper: get stagger duration for delay calculation
+function getStaggerMs(text: string) {
+  return IS_ARABIC.test(text) ? 0.15 : 0.04;
+}
 
 export default function Hero() {
   const { locale } = useLanguage();
@@ -77,6 +153,10 @@ export default function Hero() {
     forLabel: locale === 'ar' ? 'متوفر لـ' : locale === 'fr' ? 'Disponible pour' : 'Available for',
   };
 
+  // Delay for line 2 based on line 1 segment count (words for Arabic, chars for Latin)
+  const line1Delay = 0.5;
+  const line2Delay = line1Delay + getSegmentCount(t.titleL1) * getStaggerMs(t.titleL1) + 0.15;
+
   /* ─── Framer variants ─── */
   const imgVariants = {
     enter: (d: number) => ({
@@ -101,12 +181,11 @@ export default function Hero() {
       className="relative w-full min-h-[100dvh] flex flex-col lg:flex-row items-center overflow-hidden"
       style={{ background: 'linear-gradient(145deg, #0a0b0f 0%, #111218 50%, #0d0e13 100%)' }}
     >
-      {/* ── ambient glow ── */}
+      {/* ── ambient glow (no blur filter — uses large gradient for soft look) ── */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] lg:w-[700px] lg:h-[700px] rounded-full pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] lg:w-[900px] lg:h-[900px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)',
-          filter: 'blur(80px)',
+          background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, rgba(0,212,255,0.02) 40%, transparent 70%)',
         }}
       />
 
@@ -120,8 +199,125 @@ export default function Hero() {
         }}
       />
 
-      {/* ═══════ MOBILE: Phone Image (shown above text) ═══════ */}
-      <div className="lg:hidden relative z-10 w-full flex flex-col items-center pt-[90px] pb-2">
+      {/* ═══════ Text Column (FIRST on mobile, left on desktop) ═══════ */}
+      <div className="relative z-10 w-full lg:w-[42%] flex flex-col justify-center items-center lg:items-start text-center lg:text-start px-6 md:px-12 lg:px-16 xl:px-24 pt-[100px] lg:pt-0 pb-4 lg:pb-0 order-first">
+        {/* badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="flex items-center gap-2.5 mb-8"
+        >
+          <span className="h-px w-8 bg-cyan-400/50" />
+          <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-cyan-400" style={{ fontFamily: 'var(--font-sans)' }}>
+            {t.badge}
+          </span>
+        </motion.div>
+
+        {/* heading — letter by letter */}
+        <h1
+          className="text-[clamp(36px,5.5vw,72px)] font-light leading-[1.05] tracking-[-0.02em]"
+          style={{ fontFamily: 'var(--font-serif)', color: '#f1f2f4' }}
+        >
+          <TypedText text={t.titleL1} delay={line1Delay} />
+          <br />
+          <TypedText
+            text={t.titleL2}
+            delay={line2Delay}
+            isGradient
+            className="font-normal italic"
+          />
+          {/* blinking cursor */}
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0] }}
+            transition={{
+              duration: 1,
+              repeat: Infinity,
+              delay: line2Delay + getSegmentCount(t.titleL2) * getStaggerMs(t.titleL2) + 0.2,
+            }}
+            className="inline-block w-[3px] h-[0.85em] bg-cyan-400 ml-1 align-middle"
+          />
+        </h1>
+
+        {/* subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: line2Delay + getSegmentCount(t.titleL2) * getStaggerMs(t.titleL2) + 0.1 }}
+          className="mt-5 text-[14px] lg:text-[15px] leading-relaxed max-w-[420px]"
+          style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.55)' }}
+        >
+          {t.subtitle}
+        </motion.p>
+
+        {/* CTA row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: line2Delay + getSegmentCount(t.titleL2) * getStaggerMs(t.titleL2) + 0.3 }}
+          className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 lg:mt-10"
+        >
+          <Link
+            href="/create"
+            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full text-[12px] font-semibold tracking-[0.08em] uppercase overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #00d4ff 0%, #00b8e0 100%)',
+              color: '#0a0b0f',
+              fontFamily: 'var(--font-sans)',
+            }}
+          >
+            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+            <span className="relative z-[1]">{t.cta}</span>
+            <span className="relative z-[1] transition-transform group-hover:translate-x-1 arrow-flip">→</span>
+          </Link>
+
+          <Link
+            href="/#products"
+            className="flex items-center gap-2.5 text-[12px] tracking-[0.06em] uppercase transition-colors"
+            style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.5)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = '#f1f2f4')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(241,242,244,0.5)')}
+          >
+            <span className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-[10px] transition-all hover:border-cyan-400/50 hover:bg-white/5">
+              ▶
+            </span>
+            {t.browse}
+          </Link>
+        </motion.div>
+
+        {/* stats strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: line2Delay + getSegmentCount(t.titleL2) * getStaggerMs(t.titleL2) + 0.5 }}
+          className="flex gap-6 lg:gap-8 mt-10 lg:mt-14"
+        >
+          {[
+            { value: '1,200+', label: t.stat1Label },
+            { value: '4.9', label: t.stat2Label, accent: true },
+            { value: '48h', label: t.stat3Label },
+          ].map((s, i) => (
+            <div key={i} className="flex flex-col gap-1">
+              <span
+                className={`text-2xl md:text-3xl font-light leading-none ${s.accent ? 'text-cyan-400' : ''}`}
+                style={{ fontFamily: 'var(--font-serif)', color: s.accent ? undefined : '#f1f2f4' }}
+              >
+                {s.value}
+              </span>
+              <span
+                className="text-[9px] tracking-[0.14em] uppercase"
+                style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.35)' }}
+              >
+                {s.label}
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* ═══════ MOBILE: Phone Image (below text now) ═══════ */}
+      <div className="lg:hidden relative z-10 w-full flex flex-col items-center pb-6 order-last">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={`mobile-img-${current}`}
@@ -131,13 +327,13 @@ export default function Hero() {
             animate="center"
             exit="exit"
             transition={{ duration: 0.5 }}
-            className="relative w-[280px] h-[420px] sm:w-[320px] sm:h-[480px]"
+            className="relative w-[260px] h-[390px] sm:w-[300px] sm:h-[450px]"
           >
             <Image
               src={slide.image}
               alt={`${slide.phone} case`}
               fill
-              className="object-contain drop-shadow-[0_16px_48px_rgba(0,212,255,0.15)]"
+              className="object-contain"
               sizes="280px"
               priority={current === 0}
             />
@@ -189,112 +385,6 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* ═══════ Text Column ═══════ */}
-      <div className="relative z-10 w-full lg:w-[42%] flex flex-col justify-center items-center lg:items-start text-center lg:text-start px-6 md:px-12 lg:px-16 xl:px-24 pt-6 pb-12 lg:pt-0 lg:pb-0">
-        {/* badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="flex items-center gap-2.5 mb-8"
-        >
-          <span className="h-px w-8 bg-cyan-400/50" />
-          <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-cyan-400" style={{ fontFamily: 'var(--font-sans)' }}>
-            {t.badge}
-          </span>
-        </motion.div>
-
-        {/* heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-[clamp(36px,5.5vw,72px)] font-light leading-[1.05] tracking-[-0.02em]"
-          style={{ fontFamily: 'var(--font-serif)', color: '#f1f2f4' }}
-        >
-          {t.titleL1}
-          <br />
-          <span className="bg-gradient-to-r from-cyan-400 to-teal-300 bg-clip-text text-transparent font-normal italic">
-            {t.titleL2}
-          </span>
-        </motion.h1>
-
-        {/* subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45 }}
-          className="mt-5 text-[14px] lg:text-[15px] leading-relaxed max-w-[420px]"
-          style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.55)' }}
-        >
-          {t.subtitle}
-        </motion.p>
-
-        {/* CTA row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 lg:mt-10"
-        >
-          <Link
-            href="/create"
-            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full text-[12px] font-semibold tracking-[0.08em] uppercase overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, #00d4ff 0%, #00b8e0 100%)',
-              color: '#0a0b0f',
-              fontFamily: 'var(--font-sans)',
-            }}
-          >
-            <span className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-            <span className="relative z-[1]">{t.cta}</span>
-            <span className="relative z-[1] transition-transform group-hover:translate-x-1 arrow-flip">→</span>
-          </Link>
-
-          <Link
-            href="/#products"
-            className="flex items-center gap-2.5 text-[12px] tracking-[0.06em] uppercase transition-colors"
-            style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.5)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#f1f2f4')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(241,242,244,0.5)')}
-          >
-            <span className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-[10px] transition-all hover:border-cyan-400/50 hover:bg-white/5">
-              ▶
-            </span>
-            {t.browse}
-          </Link>
-        </motion.div>
-
-        {/* stats strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.75 }}
-          className="flex gap-6 lg:gap-8 mt-10 lg:mt-14"
-        >
-          {[
-            { value: '1,200+', label: t.stat1Label },
-            { value: '4.9', label: t.stat2Label, accent: true },
-            { value: '48h', label: t.stat3Label },
-          ].map((s, i) => (
-            <div key={i} className="flex flex-col gap-1">
-              <span
-                className={`text-2xl md:text-3xl font-light leading-none ${s.accent ? 'text-cyan-400' : ''}`}
-                style={{ fontFamily: 'var(--font-serif)', color: s.accent ? undefined : '#f1f2f4' }}
-              >
-                {s.value}
-              </span>
-              <span
-                className="text-[9px] tracking-[0.14em] uppercase"
-                style={{ fontFamily: 'var(--font-sans)', color: 'rgba(241,242,244,0.35)' }}
-              >
-                {s.label}
-              </span>
-            </div>
-          ))}
-        </motion.div>
-      </div>
-
       {/* ═══════ Right: Phone Showcase (Desktop) ═══════ */}
       <div className="hidden lg:flex relative z-10 w-[58%] min-h-[100dvh] items-center justify-center">
         {/* ambient rings */}
@@ -332,7 +422,7 @@ export default function Hero() {
               src={slide.image}
               alt={`${slide.phone} case`}
               fill
-              className="object-contain drop-shadow-[0_24px_80px_rgba(0,212,255,0.15)]"
+              className="object-contain lg:drop-shadow-[0_24px_80px_rgba(0,212,255,0.15)]"
               sizes="(max-width: 1280px) 420px, 500px"
               priority={current === 0}
             />
@@ -358,9 +448,8 @@ export default function Hero() {
             style={{
               fontFamily: 'var(--font-sans)',
               color: '#f1f2f4',
-              background: 'rgba(255,255,255,0.06)',
+              background: 'rgba(22,23,26,0.85)',
               border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)',
             }}
           >
             {slide.phone}
@@ -399,3 +488,4 @@ export default function Hero() {
     </section>
   );
 }
+

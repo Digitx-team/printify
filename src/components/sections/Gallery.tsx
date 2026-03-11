@@ -40,7 +40,7 @@ function ProductCard({ product, onView }: { product: Product; onView: () => void
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <span className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 text-white font-body text-sm border border-white/20">
+          <span className="flex items-center gap-2 bg-black/50 rounded-full px-4 py-2 text-white font-body text-sm border border-white/20">
             <Eye className="w-4 h-4" />
             {t('gallery_view')}
           </span>
@@ -105,7 +105,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-ink/80 backdrop-blur-sm z-[60]"
+        className="fixed inset-0 bg-ink/90 z-[60]"
         onClick={onClose}
       />
       <motion.div

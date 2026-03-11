@@ -105,7 +105,7 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 bg-white backdrop-blur-xl rounded-xl shadow-[0_12px_40px_rgba(44,31,20,0.18)] border border-soft/25 overflow-hidden min-w-[140px] z-50 py-1"
+                    className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-[0_12px_40px_rgba(44,31,20,0.18)] border border-soft/25 overflow-hidden min-w-[140px] z-50 py-1"
                   >
                     {LOCALES.map((l) => (
                       <button
@@ -170,7 +170,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-ink/20 backdrop-blur-sm z-[190] md:hidden"
+              className="fixed inset-0 bg-ink/40 z-[190] md:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
@@ -178,7 +178,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-[280px] bg-cream/95 backdrop-blur-2xl border-l border-soft/20 z-[195] flex flex-col md:hidden"
+              className="fixed top-0 right-0 bottom-0 w-[280px] bg-cream border-l border-soft/20 z-[195] flex flex-col md:hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-soft/15">

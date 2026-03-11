@@ -10,20 +10,26 @@ import { fetchProducts } from '@/lib/api';
 import type { Product } from '@/types';
 import ProductOverlay from '@/components/ui/ProductOverlay';
 
-export default function Products() {
+interface ProductsProps {
+  initialProducts?: Product[];
+}
+
+export default function Products({ initialProducts }: ProductsProps) {
   const { locale } = useLanguage();
   const { addItem } = useCart();
   const [liked, setLiked] = useState<Set<string>>(new Set());
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts || initialProducts.length === 0);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  // Only fetch client-side if no server-provided data
   useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) return;
     fetchProducts()
       .then(setProducts)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [initialProducts]);
 
 
   const toggleLike = (id: string) => {

@@ -239,24 +239,27 @@ html.dark ::-webkit-scrollbar-thumb {
   transform: scaleX(-1);
 }
 
-/* ── Smooth theme transition ── */
-body,
-nav,
-footer,
-section,
+/* ── Smooth theme transition (only on key containers) ── */
 .product-card,
-.float-card,
-h1,
-h2,
-h3,
-p,
-span,
-a,
-button {
+.float-card {
   transition:
-    background-color 0.4s ease,
-    color 0.3s ease,
+    background-color 0.3s ease,
     border-color 0.3s ease;
+}
+
+/* ── GPU-promote cards for smoother hover transforms ── */
+.product-card {
+  will-change: transform;
+}
+
+/* ── Reduce motion for accessibility + low-end devices ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Enhanced font rendering ── */

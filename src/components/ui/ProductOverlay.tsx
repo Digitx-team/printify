@@ -52,7 +52,7 @@ export default function ProductOverlay({
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-ink/60 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-ink/80" />
 
       {/* Modal */}
       <motion.div
@@ -60,7 +60,7 @@ export default function ProductOverlay({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 60, scale: 0.95 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="relative w-full max-w-[520px] bg-white sm:rounded-2xl rounded-t-2xl shadow-[0_-8px_60px_rgba(0,0,0,0.3)] sm:shadow-[0_24px_80px_rgba(0,0,0,0.3)] overflow-hidden max-h-[92vh] overflow-y-auto"
+        className="relative w-full max-w-[520px] bg-white sm:rounded-2xl rounded-t-2xl shadow-[0_-8px_60px_rgba(0,0,0,0.3)] sm:shadow-[0_24px_80px_rgba(0,0,0,0.3)] overflow-hidden max-h-[85vh] sm:max-h-[92vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Close */}
@@ -72,7 +72,7 @@ export default function ProductOverlay({
         </button>
 
         {/* Hero Image */}
-        <div className="relative w-full aspect-[4/5] sm:aspect-[4/4] bg-gradient-to-b from-cream to-soft/30 overflow-hidden">
+        <div className="relative w-full aspect-[4/4] sm:aspect-[4/4] bg-gradient-to-b from-cream to-soft/30 overflow-hidden">
           {product.popular && (
             <span className="absolute top-3 left-3 z-10 flex items-center gap-1 bg-accent text-cream font-sans text-[10px] tracking-[0.08em] uppercase px-3 py-1.5 rounded-full shadow-lg">
               <Star className="w-3 h-3 fill-cream" />
@@ -83,7 +83,7 @@ export default function ProductOverlay({
             src={product.image}
             alt={product.name}
             fill
-            className="object-contain p-6 sm:p-8"
+            className="object-contain p-4 sm:p-8"
             sizes="(max-width: 640px) 100vw, 520px"
             unoptimized={isExternal}
             priority
@@ -91,7 +91,7 @@ export default function ProductOverlay({
         </div>
 
         {/* Product Info */}
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
           {/* Name & Price */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
