@@ -9,6 +9,31 @@ import { useLanguage } from '@/context/LanguageContext';
 /* ─── Slide Data ─── */
 const SLIDES = [
   {
+    image: '/hero/slide-oppo-removebg-preview.png',
+    phone: 'Oppo Reno 12',
+    design: { en: 'Galaxy', fr: 'Galaxie', ar: 'نجوم' },
+  },
+  {
+    image: '/hero/slide-realme-removebg-preview.png',
+    phone: 'Realme GT',
+    design: { en: 'Amirahhhhh', fr: 'Princesse Amira', ar: 'أميرة' },
+  },
+  {
+    image: '/hero/slide-poco-removebg-preview.png',
+    phone: 'Poco X6 Pro',
+    design: { en: 'Gazelle', fr: 'La Gazelle', ar: 'ماي' },
+  },
+  {
+    image: '/hero/slide-redmi-removebg-preview.png',
+    phone: 'Redmi Note 13 Pro',
+    design: { en: 'Shaikha', fr: 'Shaikha', ar: 'شيخة' },
+  },
+  {
+    image: '/hero/slide-xiaomi-removebg-preview.png',
+    phone: 'Xiaomi 14',
+    design: { en: 'Floral Rose', fr: 'Rose Florale', ar: 'زهرة' },
+  },
+  {
     image: '/hero/slide-samsung-removebg-preview.png',
     phone: 'Samsung Galaxy S25 Ultra',
     design: { en: 'Arabic Calligraphy', fr: 'Calligraphie Arabe', ar: 'خط عربي' },
@@ -88,7 +113,13 @@ function TypedText({
         <motion.span
           key={`${seg}-${i}`}
           variants={child}
-          style={{ display: 'inline-block' }}
+          style={{ 
+            display: 'inline-block', 
+            paddingInline: '0.15em', 
+            marginInline: '-0.15em',
+            paddingBlock: '0.2em',
+            marginBlock: '-0.2em'
+          }}
           className={isGradient ? 'bg-gradient-to-r from-cyan-400 to-teal-300 bg-clip-text text-transparent' : ''}
         >
           {isArabic ? (i < segments.length - 1 ? seg + '\u00A0' : seg) : (seg === ' ' ? '\u00A0' : seg)}
@@ -178,7 +209,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative w-full min-h-[100dvh] flex flex-col lg:flex-row items-center overflow-hidden"
+      className="relative w-full min-h-[100dvh] flex flex-col lg:flex-row items-center overflow-x-clip"
       style={{ background: 'linear-gradient(145deg, #0a0b0f 0%, #111218 50%, #0d0e13 100%)' }}
     >
       {/* ── ambient glow (no blur filter — uses large gradient for soft look) ── */}
@@ -200,7 +231,7 @@ export default function Hero() {
       />
 
       {/* ═══════ Text Column (FIRST on mobile, left on desktop) ═══════ */}
-      <div className="relative z-10 w-full lg:w-[42%] flex flex-col justify-center items-center lg:items-start text-center lg:text-start px-6 md:px-12 lg:px-16 xl:px-24 pt-[100px] lg:pt-0 pb-4 lg:pb-0 order-first">
+      <div className="relative z-10 w-full lg:w-[42%] flex flex-col justify-center items-center lg:items-start text-center lg:text-start px-4 md:px-10 lg:px-16 xl:px-24 pt-[100px] lg:pt-0 pb-4 lg:pb-0 order-first overflow-visible">
         {/* badge */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -463,8 +494,8 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* ═══════ Desktop Slide Indicators — bottom-right ═══════ */}
-      <div className="hidden lg:flex absolute bottom-8 right-8 md:bottom-10 md:right-12 z-20 items-center gap-2">
+      {/* ═══════ Desktop Slide Indicators — bottom center ═══════ */}
+      <div className="hidden lg:flex absolute bottom-8 inset-x-0 z-20 justify-center items-center gap-2">
         {SLIDES.map((_, i) => (
           <button
             key={i}
